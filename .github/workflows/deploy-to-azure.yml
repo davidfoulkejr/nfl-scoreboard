@@ -20,7 +20,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
         
     - name: Upload to Azure Storage
-      uses: azure/CLI@v1
+      uses: azure/CLI@V2
       with:
         azcliversion: 2.71.0
         inlineScript: |
@@ -77,7 +77,7 @@ jobs:
           done
             
     - name: Purge CDN (if applicable)
-      uses: azure/CLI@v1
+      uses: azure/CLI@V2
       with:
         azcliversion: 2.71.0
         inlineScript: |
