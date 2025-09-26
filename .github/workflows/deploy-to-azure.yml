@@ -30,8 +30,7 @@ jobs:
             --destination '$web' \
             --source . \
             --overwrite \
-            --auth-mode login \
-            --pattern "*.html" "*.css" "*.js" "*.svg" "*.json"
+            --auth-mode login
           
           # Set content types for proper web serving
           az storage blob update \
