@@ -1,0 +1,78 @@
+name: Deploy to Azure Storage Static Website
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Upload to Azure Storage
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          # Upload all files to the $web container
+          az storage blob upload-batch \
+            --account-name dfou28nflscoreboard \
+            --destination '$web' \
+            --source . \
+            --overwrite \
+            --auth-mode login \
+            --pattern "*.html" "*.css" "*.js" "*.svg" "*.json"
+          
+          # Set content types for proper web serving
+          az storage blob update \
+            --account-name dfou28nflscoreboard \
+            --container-name '$web' \
+            --name 'index.html' \
+            --content-type 'text/html' \
+            --auth-mode login
+            
+          az storage blob update \
+            --account-name dfou28nflscoreboard \
+            --container-name '$web' \
+            --name 'styles.css' \
+            --content-type 'text/css' \
+            --auth-mode login
+            
+          # Update JavaScript files
+          for jsfile in js/*.js; do
+            if [ -f "$jsfile" ]; then
+              filename=$(basename "$jsfile")
+              az storage blob update \
+                --account-name dfou28nflscoreboard \
+                --container-name '$web' \
+                --name "js/$filename" \
+                --content-type 'application/javascript' \
+                --auth-mode login
+            fi
+          done
+          
+          # Update SVG favicon
+          az storage blob update \
+            --account-name dfou28nflscoreboard \
+            --container-name '$web' \
+            --name 'favicon.svg' \
+            --content-type 'image/svg+xml' \
+            --auth-mode login
+            
+    - name: Purge CDN (if applicable)
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          echo "Deployment completed successfully!"
+          echo "Your site should be updated at your static website URL"
