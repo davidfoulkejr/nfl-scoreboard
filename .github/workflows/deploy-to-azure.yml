@@ -24,49 +24,57 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          # Upload all files to the $web container
-          az storage blob upload-batch \
-            --account-name dfou28nflscoreboard \
-            --destination '$web' \
-            --source . \
-            --auth-mode login \
-            --overwrite true
-          
-          # Set content types for proper web serving
-          az storage blob update \
+          # Upload web files to the $web container with proper content types
+          az storage blob upload \
             --account-name dfou28nflscoreboard \
             --container-name '$web' \
-            --name 'index.html' \
+            --file index.html \
+            --name index.html \
             --content-type 'text/html' \
+            --overwrite \
             --auth-mode login
-            
-          az storage blob update \
+          
+          az storage blob upload \
             --account-name dfou28nflscoreboard \
             --container-name '$web' \
-            --name 'styles.css' \
+            --file styles.css \
+            --name styles.css \
             --content-type 'text/css' \
+            --overwrite \
             --auth-mode login
-            
-          # Update JavaScript files
+          
+          az storage blob upload \
+            --account-name dfou28nflscoreboard \
+            --container-name '$web' \
+            --file favicon.svg \
+            --name favicon.svg \
+            --content-type 'image/svg+xml' \
+            --overwrite \
+            --auth-mode login
+          
+          az storage blob upload \
+            --account-name dfou28nflscoreboard \
+            --container-name '$web' \
+            --file staticwebapp.config.json \
+            --name staticwebapp.config.json \
+            --content-type 'application/json' \
+            --overwrite \
+            --auth-mode login
+          
+          # Upload JavaScript files with proper content type
           for jsfile in js/*.js; do
             if [ -f "$jsfile" ]; then
               filename=$(basename "$jsfile")
-              az storage blob update \
+              az storage blob upload \
                 --account-name dfou28nflscoreboard \
                 --container-name '$web' \
+                --file "$jsfile" \
                 --name "js/$filename" \
                 --content-type 'application/javascript' \
+                --overwrite \
                 --auth-mode login
             fi
           done
-          
-          # Update SVG favicon
-          az storage blob update \
-            --account-name dfou28nflscoreboard \
-            --container-name '$web' \
-            --name 'favicon.svg' \
-            --content-type 'image/svg+xml' \
-            --auth-mode login
             
     - name: Purge CDN (if applicable)
       uses: azure/CLI@v1
