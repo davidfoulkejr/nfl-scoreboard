@@ -1,19 +1,6 @@
 # NFL Scoreboard Website
 
-A static website tha### File Structure
-
-```
-nfl-scoreboard/
-├── index.html                    # Main SPA HTML structure
-├── styles.css                    # Complete CSS with responsive design
-├── staticwebapp.config.json      # Azure Static Web Apps configuration
-├── js/
-│   ├── app.js                   # Main application and routing controller
-│   ├── apiService.js            # ESPN API data management
-│   ├── scoreboard.js            # Week scoreboard view controller
-│   └── gameDetail.js            # Individual game detail view controller
-└── README.md                     # Complete documentation
-```s NFL scoreboards by week using ESPN's API data. Built with pure HTML, CSS, and JavaScript.
+A static website that displays NFL scoreboards by week using ESPN's API data. Built with pure HTML, CSS, and JavaScript as a Single Page Application (SPA).
 
 ## Features
 
@@ -63,10 +50,19 @@ nfl-scoreboard/
 
 ```
 nfl-scoreboard/
-├── index.html          # Main HTML structure
-├── styles.css          # All CSS styling and responsive design
-├── script.js           # JavaScript application logic
-└── README.md           # This documentation file
+├── index.html                    # Main SPA HTML structure
+├── styles.css                    # Complete CSS with responsive design
+├── favicon.svg                   # Custom favicon
+├── staticwebapp.config.json      # Azure Static Web Apps configuration
+├── js/
+│   ├── app.js                   # Main application and routing controller
+│   ├── apiService.js            # ESPN API data management
+│   ├── scoreboard.js            # Week scoreboard view controller
+│   └── gameDetail.js            # Individual game detail view controller
+├── .github/
+│   └── workflows/
+│       └── deploy-to-azure.yml  # GitHub Actions deployment workflow
+└── README.md                     # Complete documentation
 ```
 
 ## Technical Implementation
@@ -120,7 +116,11 @@ Handles individual game detail display:
 ## Usage Instructions
 
 ### Running Locally
-1. **Download Files**: Save all files to a local directory
+1. **Clone Repository**: 
+   ```bash
+   git clone https://github.com/davidfoulkejr/nfl-scoreboard.git
+   cd nfl-scoreboard
+   ```
 2. **Start Server**: Run a local web server:
    ```bash
    # Using Python
@@ -130,6 +130,9 @@ Handles individual game detail display:
    npx http-server
    ```
 3. **Open Browser**: Navigate to `http://localhost:8000`
+
+### Automated Deployment
+This repository includes GitHub Actions workflow for automatic deployment to Azure Storage static website hosting. Any push to the `master` branch will automatically update the live site.
 
 ### Navigation
 - **Week Selection**: Use Previous/Next buttons or dropdown menu
@@ -157,11 +160,11 @@ Modify `styles.css` to customize:
 - Mobile responsive breakpoints
 
 ### Functionality
-Edit `script.js` to adjust:
-- API endpoints or parameters
-- Week range (currently weeks 1-18)
-- Data display preferences
-- Navigation behavior
+Edit the JavaScript files in the `js/` directory to adjust:
+- API endpoints or parameters (`apiService.js`)
+- Week range (currently weeks 1-18) (`scoreboard.js`)
+- Data display preferences (`gameDetail.js`)
+- Navigation behavior (`app.js`)
 
 ## Error Handling
 The application includes comprehensive error handling for:
