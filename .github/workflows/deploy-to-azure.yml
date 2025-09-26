@@ -22,7 +22,7 @@ jobs:
     - name: Upload to Azure Storage
       uses: azure/CLI@V2
       with:
-        azcliversion: 2.71.0
+        azcliversion: latest
         inlineScript: |
           # Upload web files to the $web container with proper content types
           az storage blob upload \
@@ -79,7 +79,7 @@ jobs:
     - name: Purge CDN (if applicable)
       uses: azure/CLI@V2
       with:
-        azcliversion: 2.71.0
+        azcliversion: latest
         inlineScript: |
           echo "Deployment completed successfully!"
           echo "Your site should be updated at your static website URL"
