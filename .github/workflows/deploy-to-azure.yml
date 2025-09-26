@@ -29,8 +29,8 @@ jobs:
             --account-name dfou28nflscoreboard \
             --destination '$web' \
             --source . \
-            --overwrite \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite true
           
           # Set content types for proper web serving
           az storage blob update \
