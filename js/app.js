@@ -57,12 +57,12 @@ class NFLApp {
         }
 
         if (parts[0] === 'team' && parts[1]) {
-            const teamId = parts[1];
+            const teamAbbr = parts[1].toUpperCase();
             
             if (parts[2] === 'schedule') {
                 return {
                     view: 'team-schedule',
-                    teamId: teamId
+                    teamAbbr: teamAbbr
                 };
             }
         }
@@ -98,7 +98,7 @@ class NFLApp {
             case 'team-schedule':
                 mainContainer.classList.remove('game-detail-mode');
                 mainContainer.classList.add('team-schedule-mode');
-                this.teamSchedule.show(route.teamId);
+                this.teamSchedule.show(route.teamAbbr);
                 break;
             default:
                 mainContainer.classList.remove('game-detail-mode', 'team-schedule-mode');
@@ -169,8 +169,8 @@ class NFLApp {
     }
 
     // Navigate to team schedule
-    navigateToTeamSchedule(teamId) {
-        window.location.hash = `#/team/${teamId}/schedule`;
+    navigateToTeamSchedule(teamAbbr) {
+        window.location.hash = `#/team/${teamAbbr.toLowerCase()}/schedule`;
     }
 
     // Navigate back to scoreboard

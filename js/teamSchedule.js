@@ -5,9 +5,69 @@ class TeamScheduleView {
         this.weekData = null;
         this.currentTeam = null;
         this.teamSchedule = [];
+        this.teamColors = null;
         
         this.initializeElements();
         this.bindEvents();
+        this.loadTeamColors();
+    }
+
+    // Load team colors data
+    async loadTeamColors() {
+        try {
+            const response = await fetch('team-colors.json');
+            this.teamColors = await response.json();
+        } catch (error) {
+            // Fallback if team colors can't be loaded
+            this.teamColors = null;
+        }
+    }
+
+    // Calculate brightness of a color based on RGB values
+    calculateColorBrightness(r, g, b) {
+        return (r * 299 + g * 587 + b * 114) / 1000;
+    }
+
+    // Determine contrasting text color based on background brightness
+    getContrastingTextColor(r, g, b) {
+        const brightness = this.calculateColorBrightness(r, g, b);
+        return brightness > 125 ? '#000000' : '#ffffff';
+    }
+
+    // Convert hex color to RGB values
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    // Get team colors and contrasting text color
+    getTeamStyleColors(teamAbbr) {
+        if (!this.teamColors || !this.teamColors[teamAbbr]) {
+            return {
+                primaryColor: '#003366',
+                textColor: '#ffffff'
+            };
+        }
+
+        const teamColorData = this.teamColors[teamAbbr];
+        const primaryHex = '#' + teamColorData.colors.hex[0];
+        const rgb = this.hexToRgb(primaryHex);
+        
+        if (!rgb) {
+            return {
+                primaryColor: '#003366',
+                textColor: '#ffffff'
+            };
+        }
+
+        return {
+            primaryColor: primaryHex,
+            textColor: this.getContrastingTextColor(rgb.r, rgb.g, rgb.b)
+        };
     }
 
     // Initialize DOM elements
@@ -33,8 +93,8 @@ class TeamScheduleView {
     }
 
     // Show team schedule view
-    show(teamId) {
-        this.currentTeam = this.getTeamInfo(teamId);
+    show(teamAbbr) {
+        this.currentTeam = this.getTeamInfoByAbbr(teamAbbr);
         
         if (!this.currentTeam) {
             this.app.navigateToScoreboard();
@@ -42,7 +102,7 @@ class TeamScheduleView {
         }
 
         // Build team schedule from all weeks
-        this.buildTeamSchedule(teamId);
+        this.buildTeamSchedule(this.currentTeam.id);
         
         // Show the container
         this.elements.container.classList.add('visible');
@@ -52,7 +112,24 @@ class TeamScheduleView {
         this.renderTeamSchedule();
     }
 
-    // Get team information from any game data
+    // Get team information by abbreviation from any game data
+    getTeamInfoByAbbr(teamAbbr) {
+        for (const [weekNum, weekData] of this.weekData) {
+            if (weekData.events) {
+                for (const event of weekData.events) {
+                    const competition = event.competitions[0];
+                    for (const competitor of competition.competitors) {
+                        if (competitor.team.abbreviation === teamAbbr) {
+                            return competitor.team;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    // Get team information by ID from any game data (for internal use)
     getTeamInfo(teamId) {
         for (const [weekNum, weekData] of this.weekData) {
             if (weekData.events) {
@@ -153,6 +230,7 @@ class TeamScheduleView {
     // Render team header with logo and info
     renderTeamHeader() {
         const record = this.calculateTeamRecord();
+        const colors = this.getTeamStyleColors(this.currentTeam.abbreviation);
         
         this.elements.header.innerHTML = `
             <div class="team-schedule-title">
@@ -173,6 +251,21 @@ class TeamScheduleView {
                 </div>
             </div>
         `;
+        
+        // Apply team colors to the header
+        this.elements.header.style.background = `linear-gradient(135deg, ${colors.primaryColor}, ${colors.primaryColor}dd)`;
+        this.elements.header.style.color = colors.textColor;
+        
+        // Update text colors for all elements in the header
+        const nameElement = this.elements.header.querySelector('.team-schedule-name');
+        const recordElement = this.elements.header.querySelector('.team-schedule-record');
+        const statLabels = this.elements.header.querySelectorAll('.stat-label');
+        const statValues = this.elements.header.querySelectorAll('.stat-value');
+        
+        if (nameElement) nameElement.style.color = colors.textColor;
+        if (recordElement) recordElement.style.color = colors.textColor;
+        statLabels.forEach(label => label.style.color = colors.textColor);
+        statValues.forEach(value => value.style.color = colors.textColor);
     }
 
     // Calculate team record from schedule
