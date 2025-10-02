@@ -2,84 +2,93 @@ name: Deploy to Azure Storage Static Website
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Azure Login
-      uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        
-    - name: Upload to Azure Storage
-      uses: azure/cli@v2
-      with:
-        azcliversion: latest
-        inlineScript: |
-          # Upload web files to the $web container with proper content types
-          az storage blob upload \
-            --account-name dfou28nflscoreboard \
-            --container-name '$web' \
-            --file index.html \
-            --name index.html \
-            --content-type 'text/html' \
-            --overwrite \
-            --auth-mode login
-          
-          az storage blob upload \
-            --account-name dfou28nflscoreboard \
-            --container-name '$web' \
-            --file styles.css \
-            --name styles.css \
-            --content-type 'text/css' \
-            --overwrite \
-            --auth-mode login
-          
-          az storage blob upload \
-            --account-name dfou28nflscoreboard \
-            --container-name '$web' \
-            --file favicon.svg \
-            --name favicon.svg \
-            --content-type 'image/svg+xml' \
-            --overwrite \
-            --auth-mode login
-          
-          az storage blob upload \
-            --account-name dfou28nflscoreboard \
-            --container-name '$web' \
-            --file staticwebapp.config.json \
-            --name staticwebapp.config.json \
-            --content-type 'application/json' \
-            --overwrite \
-            --auth-mode login
-          
-          # Upload JavaScript files with proper content type
-          for jsfile in js/*.js; do
-            if [ -f "$jsfile" ]; then
-              filename=$(basename "$jsfile")
-              az storage blob upload \
-                --account-name dfou28nflscoreboard \
-                --container-name '$web' \
-                --file "$jsfile" \
-                --name "js/$filename" \
-                --content-type 'application/javascript' \
-                --overwrite \
-                --auth-mode login
-            fi
-          done
-            
-    - name: Purge CDN (if applicable)
-      uses: azure/cli@v2
-      with:
-        azcliversion: latest
-        inlineScript: |
-          echo "Deployment completed successfully!"
-          echo "Your site should be updated at your static website URL"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Upload to Azure Storage
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            # Upload web files to the $web container with proper content types
+            az storage blob upload \
+              --account-name dfou28nflscoreboard \
+              --container-name '$web' \
+              --file index.html \
+              --name index.html \
+              --content-type 'text/html' \
+              --overwrite \
+              --auth-mode login
+
+            az storage blob upload \
+              --account-name dfou28nflscoreboard \
+              --container-name '$web' \
+              --file styles.css \
+              --name styles.css \
+              --content-type 'text/css' \
+              --overwrite \
+              --auth-mode login
+
+            az storage blob upload \
+              --account-name dfou28nflscoreboard \
+              --container-name '$web' \
+              --file favicon.svg \
+              --name favicon.svg \
+              --content-type 'image/svg+xml' \
+              --overwrite \
+              --auth-mode login
+
+            az storage blob upload \
+              --account-name dfou28nflscoreboard \
+              --container-name '$web' \
+              --file staticwebapp.config.json \
+              --name staticwebapp.config.json \
+              --content-type 'application/json' \
+              --overwrite \
+              --auth-mode login
+
+            az storage blob upload \
+              --account-name dfou28nflscoreboard \
+              --container-name '$web' \
+              --file team-colors.json \
+              --name team-colors.json \
+              --content-type 'application/json' \
+              --overwrite \
+              --auth-mode login
+
+            # Upload JavaScript files with proper content type
+            for jsfile in js/*.js; do
+              if [ -f "$jsfile" ]; then
+                filename=$(basename "$jsfile")
+                az storage blob upload \
+                  --account-name dfou28nflscoreboard \
+                  --container-name '$web' \
+                  --file "$jsfile" \
+                  --name "js/$filename" \
+                  --content-type 'application/javascript' \
+                  --overwrite \
+                  --auth-mode login
+              fi
+            done
+
+      - name: Purge CDN (if applicable)
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            echo "Deployment completed successfully!"
+            echo "Your site should be updated at your static website URL"
