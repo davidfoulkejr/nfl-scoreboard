@@ -54,7 +54,7 @@ class TeamScheduleView {
         }
 
         const teamColorData = this.teamColors[teamAbbr];
-        const primaryHex = '#' + teamColorData.colors.hex[0];
+        const primaryHex = teamColorData.colors.hex[0];
         const rgb = this.hexToRgb(primaryHex);
         
         if (!rgb) {

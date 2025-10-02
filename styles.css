@@ -876,7 +876,9 @@ body {
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     overflow: hidden;
-    margin-top: 2rem;
+    margin: 2rem auto 0 auto;
+    max-width: 1200px;
+    padding: 0 1rem;
 }
 
 .team-schedule-container.visible {
@@ -972,6 +974,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     padding: 1rem;
+    padding-top: 2.5rem;
     cursor: pointer;
     transition: var(--transition);
     position: relative;
@@ -996,14 +999,15 @@ body {
 
 .game-week {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: 0.75rem;
+    right: 0.75rem;
     background-color: var(--primary-color);
     color: white;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.6rem;
     border-radius: 12px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
+    z-index: 1;
 }
 
 .game-matchup {
