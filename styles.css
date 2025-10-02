@@ -69,6 +69,12 @@ body {
     min-height: 0; /* Remove forced height in game detail mode */
 }
 
+/* Reduce main container padding when showing team schedule */
+.main-container.team-schedule-mode {
+    padding-top: 0;
+    min-height: 0; /* Remove forced height in team schedule mode */
+}
+
 /* Game Detail Container - positioned independently */
 
 /* Loading State */
@@ -330,6 +336,21 @@ body {
     font-size: 0.9rem;
     color: var(--text-secondary);
     margin-bottom: 0.25rem;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: 4px;
+    padding: 0.2rem 0.4rem;
+}
+
+.team-name:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+.team-info {
+    display: flex;
+    flex-direction: column;
 }
 
 .team-city {
@@ -846,6 +867,242 @@ body {
     font-size: 1.2rem;
 }
 
+/* ===== TEAM SCHEDULE STYLES ===== */
+
+/* Team Schedule Container */
+.team-schedule-container {
+    display: none;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.team-schedule-container.visible {
+    display: block;
+}
+
+/* Team Schedule Navigation */
+.team-schedule-nav {
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #fafafa;
+}
+
+/* Team Schedule Header */
+.team-schedule-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.team-schedule-title {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.team-schedule-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.team-schedule-info {
+    flex-grow: 1;
+}
+
+.team-schedule-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.team-schedule-record {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.schedule-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Team Schedule Games */
+.team-schedule-games {
+    padding: 2rem;
+}
+
+.team-schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+/* Team Game Card */
+.team-game-card {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.team-game-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.team-game-card.result-w {
+    border-left: 4px solid #28a745;
+}
+
+.team-game-card.result-l {
+    border-left: 4px solid #dc3545;
+}
+
+.team-game-card.result-t {
+    border-left: 4px solid #ffc107;
+}
+
+.game-week {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.game-matchup {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.matchup-indicator {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    min-width: 25px;
+    text-align: center;
+}
+
+.opponent-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.opponent-info {
+    flex-grow: 1;
+}
+
+.opponent-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.game-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.game-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.final-score {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}
+
+.score.winner {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.result-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.result-badge.result-w {
+    background-color: #28a745;
+    color: white;
+}
+
+.result-badge.result-l {
+    background-color: #dc3545;
+    color: white;
+}
+
+.result-badge.result-t {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.game-time {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.game-status {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
 /* Footer */
 .footer {
     background-color: var(--primary-color);
@@ -1032,5 +1289,52 @@ body {
         width: 80px;
         height: 80px;
         margin-bottom: 0.5rem;
+    }
+    
+    /* Team Schedule Mobile Styles */
+    .team-schedule-header {
+        padding: 1rem;
+    }
+    
+    .team-schedule-title {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .team-schedule-logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .team-schedule-name {
+        font-size: 1.8rem;
+    }
+    
+    .schedule-stats {
+        gap: 1rem;
+        justify-content: center;
+    }
+    
+    .team-schedule-games {
+        padding: 1rem;
+    }
+    
+    .team-schedule-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .team-game-card {
+        padding: 0.75rem;
+    }
+    
+    .opponent-logo {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .score {
+        font-size: 1.2rem;
     }
 }

@@ -188,7 +188,15 @@ class ScoreboardView {
         card.style.cursor = 'pointer';
         
         // Add click handler for navigation to game detail
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
+            // Check if clicked element is a team name
+            if (e.target.classList.contains('team-name') && e.target.dataset.teamId) {
+                e.stopPropagation();
+                this.app.navigateToTeamSchedule(e.target.dataset.teamId);
+                return;
+            }
+            
+            // Otherwise navigate to game detail
             this.app.navigateToGame(weekNumber, event.id);
         });
         
@@ -251,8 +259,10 @@ class ScoreboardView {
             <div class="team">
                 <img src="${logoUrl}" alt="${team.displayName}" class="team-logo" 
                      onerror="this.src='https://a.espncdn.com/i/teamlogos/nfl/500/default-team.png'">
-                <div class="team-name">${team.location}</div>
-                <div class="team-city">${team.name}</div>
+                <div class="team-info">
+                    <div class="team-name" data-team-id="${team.id}" title="View ${team.displayName} schedule">${team.location}</div>
+                    <div class="team-city">${team.name}</div>
+                </div>
                 ${isCompleted ? `<div class="team-score ${isWinner ? 'winner' : ''}">${score}</div>` : ''}
             </div>
         `;

@@ -6,6 +6,7 @@ class NFLApp {
         this.apiService = new APIService();
         this.scoreboard = new ScoreboardView(this);
         this.gameDetail = new GameDetailView(this);
+        this.teamSchedule = new TeamScheduleView(this);
         
         this.initializeRouter();
         this.bindEvents();
@@ -55,6 +56,17 @@ class NFLApp {
             return { view: 'scoreboard', week: week };
         }
 
+        if (parts[0] === 'team' && parts[1]) {
+            const teamId = parts[1];
+            
+            if (parts[2] === 'schedule') {
+                return {
+                    view: 'team-schedule',
+                    teamId: teamId
+                };
+            }
+        }
+
         // Default fallback
         return { view: 'scoreboard', week: null };
     }
@@ -75,15 +87,21 @@ class NFLApp {
         // Show appropriate view based on route
         switch (route.view) {
             case 'scoreboard':
-                mainContainer.classList.remove('game-detail-mode');
+                mainContainer.classList.remove('game-detail-mode', 'team-schedule-mode');
                 this.scoreboard.show(route.week);
                 break;
             case 'game-detail':
+                mainContainer.classList.remove('team-schedule-mode');
                 mainContainer.classList.add('game-detail-mode');
                 this.gameDetail.show(route.week, route.gameId);
                 break;
-            default:
+            case 'team-schedule':
                 mainContainer.classList.remove('game-detail-mode');
+                mainContainer.classList.add('team-schedule-mode');
+                this.teamSchedule.show(route.teamId);
+                break;
+            default:
+                mainContainer.classList.remove('game-detail-mode', 'team-schedule-mode');
                 this.scoreboard.show();
         }
     }
@@ -94,6 +112,7 @@ class NFLApp {
         const weekNav = document.getElementById('week-navigation');
         const gamesContainer = document.getElementById('games-container');
         const gameDetailContainer = document.getElementById('game-detail-container');
+        const teamScheduleContainer = document.getElementById('team-schedule-container');
         const noGames = document.getElementById('no-games');
         
         weekNav.classList.remove('visible');
@@ -104,6 +123,9 @@ class NFLApp {
         
         gameDetailContainer.classList.remove('visible');
         gameDetailContainer.style.display = 'none';
+        
+        teamScheduleContainer.classList.remove('visible');
+        teamScheduleContainer.style.display = 'none';
         
         noGames.classList.remove('visible');
         noGames.style.display = 'none';
@@ -124,6 +146,7 @@ class NFLApp {
             // Initialize views with data
             this.scoreboard.initialize(this.weekData);
             this.gameDetail.initialize(this.weekData);
+            this.teamSchedule.initialize(this.weekData);
             
             this.showContent();
             
@@ -143,6 +166,11 @@ class NFLApp {
     // Navigate to game detail
     navigateToGame(weekNumber, gameId) {
         window.location.hash = `#/week/${weekNumber}/game/${gameId}`;
+    }
+
+    // Navigate to team schedule
+    navigateToTeamSchedule(teamId) {
+        window.location.hash = `#/team/${teamId}/schedule`;
     }
 
     // Navigate back to scoreboard
