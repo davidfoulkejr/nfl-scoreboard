@@ -44,7 +44,8 @@ jobs:
             echo "Clearing existing files from \$web container..."
             az storage blob delete-batch \
               --account-name dfou28nflscoreboard \
-              --source '$web' || echo "No existing files to delete"
+              --source '$web' \
+              --auth-mode login || echo "No existing files to delete"
 
             # Upload all built files from dist directory
             echo "Uploading files from ./dist to \$web container..."
@@ -52,6 +53,7 @@ jobs:
               --account-name dfou28nflscoreboard \
               --destination '$web' \
               --source './dist' \
+              --auth-mode login \
               --overwrite
 
             # Copy staticwebapp.config.json to root (if it exists)
@@ -63,6 +65,7 @@ jobs:
                 --file staticwebapp.config.json \
                 --name staticwebapp.config.json \
                 --content-type 'application/json' \
+                --auth-mode login \
                 --overwrite
             fi
 
