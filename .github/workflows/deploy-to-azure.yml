@@ -45,7 +45,6 @@ jobs:
               --account-name dfou28nflscoreboard \
               --container '$web' \
               --source './dist' \
-              --auth-mode login \
               --delete-destination true
 
             # Copy staticwebapp.config.json to root (if it exists)
@@ -57,7 +56,6 @@ jobs:
                 --name staticwebapp.config.json \
                 --content-type 'application/json' \
                 --overwrite \
-                --auth-mode login
             fi
 
       - name: Purge CDN (if applicable)
