@@ -40,23 +40,29 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            # Sync all built files from dist directory
-            az storage blob sync \
+            # Clear existing files in container (optional - comment out if you want to keep old files)
+            echo "Clearing existing files from \$web container..."
+            az storage blob delete-batch \
               --account-name dfou28nflscoreboard \
-              --container '$web' \
+              --source '$web' || echo "No existing files to delete"
+
+            # Upload all built files from dist directory
+            echo "Uploading files from ./dist to \$web container..."
+            az storage blob upload-batch \
+              --account-name dfou28nflscoreboard \
+              --destination '$web' \
               --source './dist' \
-              --auth-mode login \
-              --delete-destination true
+              --overwrite
 
             # Copy staticwebapp.config.json to root (if it exists)
             if [ -f "staticwebapp.config.json" ]; then
+              echo "Uploading staticwebapp.config.json..."
               az storage blob upload \
                 --account-name dfou28nflscoreboard \
                 --container-name '$web' \
                 --file staticwebapp.config.json \
                 --name staticwebapp.config.json \
                 --content-type 'application/json' \
-                --auth-mode login \
                 --overwrite
             fi
 
