@@ -35,6 +35,16 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Verify Authentication
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            echo "Testing Azure CLI authentication..."
+            az account show
+            echo "Checking storage account access..."
+            az storage account show --name dfou28nflscoreboard --resource-group $(az storage account list --query "[?name=='dfou28nflscoreboard'].resourceGroup" --output tsv)
+
       - name: Upload to Azure Storage
         uses: azure/cli@v2
         with:
@@ -45,6 +55,7 @@ jobs:
               --account-name dfou28nflscoreboard \
               --container '$web' \
               --source './dist' \
+              --auth-mode login \
               --delete-destination true
 
             # Copy staticwebapp.config.json to root (if it exists)
@@ -55,7 +66,8 @@ jobs:
                 --file staticwebapp.config.json \
                 --name staticwebapp.config.json \
                 --content-type 'application/json' \
-                --overwrite \
+                --auth-mode login \
+                --overwrite
             fi
 
       - name: Purge CDN (if applicable)
