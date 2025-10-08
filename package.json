@@ -1,0 +1,24 @@
+{
+  "name": "nfl-scoreboard",
+  "version": "1.0.0",
+  "description": "A static website that displays NFL scoreboards by week using ESPN's API data. Built with pure HTML, CSS, and JavaScript as a Single Page Application (SPA).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "vite preview --port 3000"
+  },
+  "keywords": [
+    "nfl",
+    "scoreboard",
+    "sports",
+    "javascript"
+  ],
+  "author": "David Foulke Jr",
+  "license": "ISC",
+  "devDependencies": {
+    "terser": "^5.44.0",
+    "vite": "^7.1.9"
+  }
+}

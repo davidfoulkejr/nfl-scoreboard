@@ -346,3 +346,5 @@ class GameDetailView {
         }
     }
 }
+
+export default GameDetailView;

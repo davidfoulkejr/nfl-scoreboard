@@ -3,8 +3,7 @@ name: Deploy to Azure Storage Static Website
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
+    paths-ignore: ["README.md"]
 
 jobs:
   deploy:
@@ -16,6 +15,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
 
       - name: Azure Login
         uses: azure/login@v2
@@ -29,66 +40,25 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            # Upload web files to the $web container with proper content types
-            az storage blob upload \
+            # Sync all built files from dist directory
+            az storage blob sync \
               --account-name dfou28nflscoreboard \
-              --container-name '$web' \
-              --file index.html \
-              --name index.html \
-              --content-type 'text/html' \
-              --overwrite \
-              --auth-mode login
+              --container '$web' \
+              --source './dist' \
+              --auth-mode login \
+              --delete-destination true
 
-            az storage blob upload \
-              --account-name dfou28nflscoreboard \
-              --container-name '$web' \
-              --file styles.css \
-              --name styles.css \
-              --content-type 'text/css' \
-              --overwrite \
-              --auth-mode login
-
-            az storage blob upload \
-              --account-name dfou28nflscoreboard \
-              --container-name '$web' \
-              --file favicon.svg \
-              --name favicon.svg \
-              --content-type 'image/svg+xml' \
-              --overwrite \
-              --auth-mode login
-
-            az storage blob upload \
-              --account-name dfou28nflscoreboard \
-              --container-name '$web' \
-              --file staticwebapp.config.json \
-              --name staticwebapp.config.json \
-              --content-type 'application/json' \
-              --overwrite \
-              --auth-mode login
-
-            az storage blob upload \
-              --account-name dfou28nflscoreboard \
-              --container-name '$web' \
-              --file team-colors.json \
-              --name team-colors.json \
-              --content-type 'application/json' \
-              --overwrite \
-              --auth-mode login
-
-            # Upload JavaScript files with proper content type
-            for jsfile in js/*.js; do
-              if [ -f "$jsfile" ]; then
-                filename=$(basename "$jsfile")
-                az storage blob upload \
-                  --account-name dfou28nflscoreboard \
-                  --container-name '$web' \
-                  --file "$jsfile" \
-                  --name "js/$filename" \
-                  --content-type 'application/javascript' \
-                  --overwrite \
-                  --auth-mode login
-              fi
-            done
+            # Copy staticwebapp.config.json to root (if it exists)
+            if [ -f "staticwebapp.config.json" ]; then
+              az storage blob upload \
+                --account-name dfou28nflscoreboard \
+                --container-name '$web' \
+                --file staticwebapp.config.json \
+                --name staticwebapp.config.json \
+                --content-type 'application/json' \
+                --overwrite \
+                --auth-mode login
+            fi
 
       - name: Purge CDN (if applicable)
         uses: azure/cli@v2

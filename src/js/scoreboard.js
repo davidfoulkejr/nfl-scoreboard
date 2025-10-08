@@ -323,3 +323,5 @@ class ScoreboardView {
         }
     }
 }
+
+export default ScoreboardView;

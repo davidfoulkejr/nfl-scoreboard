@@ -1,3 +1,9 @@
+import APIService from './apiService.js';
+import ScoreboardView from './scoreboard.js';
+import GameDetailView from './gameDetail.js';
+import TeamScheduleView from './teamSchedule.js';
+import '../styles/styles.css';
+
 // Main Application Router and Controller
 class NFLApp {
     constructor() {
@@ -225,3 +231,5 @@ class NFLApp {
 document.addEventListener('DOMContentLoaded', () => {
     window.nflApp = new NFLApp();
 });
+
+export default NFLApp;

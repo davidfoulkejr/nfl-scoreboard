@@ -82,3 +82,5 @@ class APIService {
         return await this.fetchWeekData(weekNumber);
     }
 }
+
+export default APIService;

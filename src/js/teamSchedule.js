@@ -15,7 +15,7 @@ class TeamScheduleView {
     // Load team colors data
     async loadTeamColors() {
         try {
-            const response = await fetch('team-colors.json');
+            const response = await fetch('/team-colors.json');
             this.teamColors = await response.json();
         } catch (error) {
             // Fallback if team colors can't be loaded
@@ -359,3 +359,5 @@ class TeamScheduleView {
         });
     }
 }
+
+export default TeamScheduleView;
