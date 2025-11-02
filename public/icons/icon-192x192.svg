@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Background circle -->
+  <circle cx="96" cy="96" r="90" fill="#1a5f3f" stroke="#fff" stroke-width="6"/>
+  
+  <!-- Goal post base -->
+  <rect x="90" y="108" width="12" height="60" fill="#ffd700"/>
+  
+  <!-- Left upright -->
+  <rect x="54" y="36" width="12" height="72" fill="#ffd700"/>
+  
+  <!-- Right upright -->
+  <rect x="126" y="36" width="12" height="72" fill="#ffd700"/>
+  
+  <!-- Crossbar -->
+  <rect x="54" y="102" width="84" height="12" fill="#ffd700"/>
+  
+  <!-- Field grass texture lines (clipped to circle) -->
+  <defs>
+    <clipPath id="circleClip192">
+      <circle cx="96" cy="96" r="90"/>
+    </clipPath>
+  </defs>
+  
+  <g clip-path="url(#circleClip192)">
+    <line x1="12" y1="156" x2="180" y2="156" stroke="#c0c0c0" stroke-width="6" opacity="0.6"/>
+    <line x1="12" y1="168" x2="180" y2="168" stroke="#c0c0c0" stroke-width="6" opacity="0.6"/>
+    <line x1="12" y1="180" x2="180" y2="180" stroke="#c0c0c0" stroke-width="6" opacity="0.6"/>
+    <!-- Additional field lines for larger size -->
+    <line x1="12" y1="144" x2="180" y2="144" stroke="#c0c0c0" stroke-width="4" opacity="0.4"/>
+    <line x1="12" y1="132" x2="180" y2="132" stroke="#c0c0c0" stroke-width="4" opacity="0.4"/>
+  </g>
+  
+  <!-- Add small football for detail -->
+  <ellipse cx="96" cy="130" rx="8" ry="4" fill="#8b4513"/>
+  <line x1="88" y1="130" x2="104" y2="130" stroke="#fff" stroke-width="1"/>
+</svg>

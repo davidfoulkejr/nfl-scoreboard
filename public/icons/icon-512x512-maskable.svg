@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Safe area background (maskable icons need this) -->
+  <rect x="0" y="0" width="512" height="512" fill="#013369"/>
+  
+  <!-- Background circle (smaller to account for masking) -->
+  <circle cx="256" cy="256" r="180" fill="#1a5f3f" stroke="#fff" stroke-width="12"/>
+  
+  <!-- Goal post base -->
+  <rect x="240" y="280" width="32" height="120" fill="#ffd700"/>
+  
+  <!-- Left upright -->
+  <rect x="160" y="120" width="24" height="160" fill="#ffd700"/>
+  
+  <!-- Right upright -->
+  <rect x="328" y="120" width="24" height="160" fill="#ffd700"/>
+  
+  <!-- Crossbar -->
+  <rect x="160" y="264" width="192" height="24" fill="#ffd700"/>
+  
+  <!-- Field grass texture lines (clipped to circle) -->
+  <defs>
+    <clipPath id="circleClipMaskable512">
+      <circle cx="256" cy="256" r="180"/>
+    </clipPath>
+  </defs>
+  
+  <g clip-path="url(#circleClipMaskable512)">
+    <!-- Yard lines -->
+    <line x1="80" y1="370" x2="432" y2="370" stroke="#c0c0c0" stroke-width="12" opacity="0.6"/>
+    <line x1="80" y1="390" x2="432" y2="390" stroke="#c0c0c0" stroke-width="12" opacity="0.6"/>
+    <line x1="80" y1="410" x2="432" y2="410" stroke="#c0c0c0" stroke-width="12" opacity="0.6"/>
+    <line x1="80" y1="350" x2="432" y2="350" stroke="#c0c0c0" stroke-width="8" opacity="0.4"/>
+    <line x1="80" y1="330" x2="432" y2="330" stroke="#c0c0c0" stroke-width="8" opacity="0.4"/>
+    <line x1="80" y1="310" x2="432" y2="310" stroke="#c0c0c0" stroke-width="8" opacity="0.4"/>
+    <!-- Hash marks -->
+    <line x1="240" y1="310" x2="272" y2="310" stroke="#fff" stroke-width="3" opacity="0.8"/>
+    <line x1="240" y1="330" x2="272" y2="330" stroke="#fff" stroke-width="3" opacity="0.8"/>
+    <line x1="240" y1="350" x2="272" y2="350" stroke="#fff" stroke-width="3" opacity="0.8"/>
+  </g>
+  
+  <!-- Football -->
+  <ellipse cx="256" cy="330" rx="16" ry="10" fill="#8b4513"/>
+  <line x1="240" y1="330" x2="272" y2="330" stroke="#fff" stroke-width="2"/>
+  <line x1="248" y1="325" x2="248" y2="335" stroke="#fff" stroke-width="1"/>
+  <line x1="264" y1="325" x2="264" y2="335" stroke="#fff" stroke-width="1"/>
+</svg>
