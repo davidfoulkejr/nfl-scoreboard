@@ -232,16 +232,7 @@ class NFLApp {
 
     // Check if there are any live games currently
     hasLiveGames() {
-        for (const [_weekNumber, weekData] of this.weekData) {
-            if (weekData && weekData.events) {
-                const liveGames = weekData.events.some(event => {
-                    const competition = event.competitions?.[0];
-                    return competition?.status?.type?.state === 'in';
-                });
-                if (liveGames) return true;
-            }
-        }
-        return false;
+        return this.getCurrentWeekWithLiveGames() !== null;
     }
 
     // Find the current week with live games
