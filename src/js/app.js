@@ -319,9 +319,12 @@ class NFLApp {
                 this.weekData.set(currentWeek, refreshedData);
                 
                 // Update the currently displayed view if it's showing the refreshed week
-                if (this.currentRoute?.view === 'scoreboard' && 
-                    (this.currentRoute.week === currentWeek || !this.currentRoute.week)) {
-                    this.scoreboard.displayWeek(currentWeek);
+                if ((this.currentRoute.week === currentWeek || !this.currentRoute.week)) {
+                    if (this.currentRoute.view === 'scoreboard') {
+                        this.scoreboard.displayWeek(currentWeek);
+                    } else if (this.currentRoute.view === 'game-detail' && this.currentRoute.gameId) {
+                        this.gameDetail.show(currentWeek, this.currentRoute.gameId);
+                    }
                 }
                 
                 // Check if we still have live games, stop refreshing if not

@@ -107,7 +107,7 @@ class ScoreboardView {
 
     // Display games for a specific week
     displayWeek(weekNumber) {
-        const weekData = this.weekData.get(weekNumber);
+        const weekData = this.weekData?.get(weekNumber);
         
         if (!weekData) {
             this.elements.noGames.classList.add('visible');
