@@ -107,7 +107,7 @@ class ScoreboardView {
 
     // Display games for a specific week
     displayWeek(weekNumber) {
-        const weekData = this.weekData.get(weekNumber);
+        const weekData = this.weekData?.get(weekNumber);
         
         if (!weekData) {
             this.elements.noGames.classList.add('visible');
@@ -230,9 +230,9 @@ class ScoreboardView {
             
             <div class="teams-container">
                 <div class="team-matchup">
-                    ${this.createTeamHTML(awayTeam, status.type.completed)}
+                    ${this.createTeamHTML(awayTeam, status)}
                     <div class="vs-separator">@</div>
-                    ${this.createTeamHTML(homeTeam, status.type.completed)}
+                    ${this.createTeamHTML(homeTeam, status)}
                 </div>
             </div>
             
@@ -247,10 +247,11 @@ class ScoreboardView {
     }
 
     // Create team HTML section
-    createTeamHTML(competitor, isCompleted) {
+    createTeamHTML(competitor, status) {
         const team = competitor.team;
         const score = competitor.score || '0';
         const isWinner = competitor.winner || false;
+        const showScore = status.type.state === 'in' || status.type.state === 'post';
         
         // Get team logo (fallback to ESPN default)
         const logoUrl = team.logo || `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation.toLowerCase()}.png`;
@@ -263,14 +264,27 @@ class ScoreboardView {
                     <div class="team-name" data-team-abbr="${team.abbreviation}" title="View ${team.displayName} schedule">${team.location}</div>
                     <div class="team-city">${team.name}</div>
                 </div>
-                ${isCompleted ? `<div class="team-score ${isWinner ? 'winner' : ''}">${score}</div>` : ''}
+                ${showScore ? `<div class="team-score ${isWinner ? 'winner' : ''}">${score}</div>` : ''}
             </div>
         `;
     }
 
-    // Create game details section (odds for scheduled, broadcast for others)
+    // Create game details section (odds for scheduled, live info for in-progress, broadcast for others)
     createGameDetailsHTML(competition, status) {
         let detailsHTML = '';
+        
+        // Show live game info for in-progress games
+        if (status.type.state === 'in') {
+            detailsHTML += `
+                <div class="live-game-info">
+                    <div class="game-clock">
+                        <span class="clock-icon">🕐</span>
+                        <span class="clock-text">${status.displayClock} - ${this.formatPeriod(status.period)}</span>
+                    </div>
+                    ${this.createSituationInfo(competition)}
+                </div>
+            `;
+        }
         
         // Show betting odds for scheduled games
         if (status.type.state === 'pre' && competition.odds && competition.odds.length > 0) {
@@ -321,6 +335,49 @@ class ScoreboardView {
             default:
                 return 'scheduled';
         }
+    }
+
+    // Format period number to readable quarter
+    formatPeriod(period) {
+        switch (period) {
+            case 1: return '1st';
+            case 2: return '2nd';
+            case 3: return '3rd';
+            case 4: return '4th';
+            default: return `${period > 4 ? 'OT' : period}`;
+        }
+    }
+
+    // Create situation info for live games
+    createSituationInfo(competition) {
+        if (!competition.situation) return '';
+        
+        const situation = competition.situation;
+        let situationHTML = '';
+        
+        // Show possession if available
+        if (situation.possession) {
+            const possessionTeam = competition.competitors.find(c => c.id === situation.possession);
+            if (possessionTeam) {
+                situationHTML += `
+                    <div class="possession-info">
+                        <span class="possession-icon">🏈</span>
+                        <span>${possessionTeam.team.abbreviation} has possession</span>
+                    </div>
+                `;
+            }
+        }
+        
+        // Show down and distance if available
+        if (situation.shortDownDistanceText) {
+            situationHTML += `
+                <div class="down-distance">
+                    ${situation.shortDownDistanceText}
+                </div>
+            `;
+        }
+        
+        return situationHTML;
     }
 }
 
