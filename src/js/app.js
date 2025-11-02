@@ -13,6 +13,7 @@ class NFLApp {
         this.scoreboard = new ScoreboardView(this);
         this.gameDetail = new GameDetailView(this);
         this.teamSchedule = new TeamScheduleView(this);
+        this.refreshInterval = null;
         
         this.initializeRouter();
         this.bindEvents();
@@ -156,6 +157,9 @@ class NFLApp {
             
             this.showContent();
             
+            // Start auto-refresh if there are live games
+            this.startAutoRefresh();
+            
             // Handle current route
             this.handleRouteChange();
 
@@ -224,6 +228,110 @@ class NFLApp {
     // Get list of available weeks
     getAvailableWeeks() {
         return Array.from(this.weekData.keys()).sort((a, b) => a - b);
+    }
+
+    // Check if there are any live games currently
+    hasLiveGames() {
+        for (const [_weekNumber, weekData] of this.weekData) {
+            if (weekData && weekData.events) {
+                const liveGames = weekData.events.some(event => {
+                    const competition = event.competitions?.[0];
+                    return competition?.status?.type?.state === 'in';
+                });
+                if (liveGames) return true;
+            }
+        }
+        return false;
+    }
+
+    // Find the current week with live games
+    getCurrentWeekWithLiveGames() {
+        const today = new Date();
+        
+        for (const [weekNumber, weekData] of this.weekData) {
+            if (weekData && weekData.events) {
+                const hasLiveGames = weekData.events.some(event => {
+                    const competition = event.competitions?.[0];
+                    return competition?.status?.type?.state === 'in';
+                });
+                
+                if (hasLiveGames) {
+                    return weekNumber;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Start auto-refresh for live games
+    startAutoRefresh() {
+        // Clear any existing interval
+        this.stopAutoRefresh();
+        
+        if (this.hasLiveGames()) {
+            this.refreshInterval = setInterval(async () => {
+                await this.refreshLiveGames();
+            }, 30000); // Refresh every 30 seconds
+            
+            // Show live indicator
+            this.showLiveIndicator();
+        }
+    }
+
+    // Stop auto-refresh
+    stopAutoRefresh() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+            this.refreshInterval = null;
+            
+            // Hide live indicator
+            this.hideLiveIndicator();
+        }
+    }
+
+    // Show live indicator
+    showLiveIndicator() {
+        const indicator = document.getElementById('live-indicator');
+        if (indicator) {
+            indicator.classList.add('visible');
+        }
+    }
+
+    // Hide live indicator
+    hideLiveIndicator() {
+        const indicator = document.getElementById('live-indicator');
+        if (indicator) {
+            indicator.classList.remove('visible');
+        }
+    }
+
+    // Refresh data for weeks with live games
+    async refreshLiveGames() {
+        const currentWeek = this.getCurrentWeekWithLiveGames();
+        if (!currentWeek) {
+            this.stopAutoRefresh();
+            return;
+        }
+
+        try {
+            const refreshedData = await this.apiService.refreshWeekData(currentWeek);
+            if (refreshedData) {
+                this.weekData.set(currentWeek, refreshedData);
+                
+                // Update the currently displayed view if it's showing the refreshed week
+                if (this.currentRoute?.view === 'scoreboard' && 
+                    (this.currentRoute.week === currentWeek || !this.currentRoute.week)) {
+                    this.scoreboard.displayWeek(currentWeek);
+                }
+                
+                // Check if we still have live games, stop refreshing if not
+                if (!this.hasLiveGames()) {
+                    this.stopAutoRefresh();
+                }
+            }
+        } catch (error) {
+            console.warn('Failed to refresh live game data:', error);
+        }
     }
 }
 

@@ -55,6 +55,39 @@ body {
     opacity: 0.9;
 }
 
+.live-indicator {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #28a745;
+}
+
+.live-indicator.visible {
+    display: flex;
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #28a745;
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
 /* Main Container */
 .main-container {
     max-width: 1200px;
@@ -426,6 +459,48 @@ body {
 .broadcast-networks {
     font-weight: 600;
     color: var(--primary-color);
+}
+
+/* Live Game Info */
+.live-game-info {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.75rem;
+}
+
+.game-clock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.clock-icon {
+    font-size: 1.2rem;
+}
+
+.possession-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.possession-icon {
+    font-size: 1rem;
+}
+
+.down-distance {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .click-hint {
