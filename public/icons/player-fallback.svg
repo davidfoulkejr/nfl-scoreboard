@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <rect width="80" height="80" fill="#f5f5f5" rx="8"/>
+  <circle cx="40" cy="28" r="12" fill="#d4d4d4"/>
+  <path d="M20 65 C20 52, 28 45, 40 45 S60 52, 60 65" fill="#d4d4d4"/>
+  <text x="40" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#999">NFL</text>
+</svg>

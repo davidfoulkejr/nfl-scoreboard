@@ -240,8 +240,10 @@ class GameDetailView {
             
             section += `
                 <div class="leader-card">
-                    <img src="${athlete.headshot}" alt="${athlete.displayName}" class="leader-photo" 
-                         onerror="this.src='https://via.placeholder.com/80x80?text=${athlete.shortName}'">
+                    <img src="${athlete.headshot || '/icons/player-fallback.svg'}" 
+                         alt="${athlete.displayName}" 
+                         class="leader-photo" 
+                         onerror="this.onerror=null; this.src='/icons/player-fallback.svg';">
                     <div class="leader-info">
                         <div class="leader-name">${athlete.displayName}</div>
                         <div class="leader-position">${athlete.position.abbreviation} • #${athlete.jersey}</div>
