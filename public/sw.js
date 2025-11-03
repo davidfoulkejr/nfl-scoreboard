@@ -9,7 +9,8 @@ const CORE_RESOURCES = [
   '/favicon.svg',
   '/manifest.json',
   '/team-colors.json',
-  '/icons/player-fallback.svg'
+  '/icons/player-fallback.svg',
+  '/icons/apple-touch-icon.svg'
 ];
 
 // Pattern-based caching for production build assets
