@@ -2,18 +2,6 @@
   <!-- Background with rounded corners for iOS -->
   <rect x="0" y="0" width="180" height="180" rx="40" ry="40" fill="#1a5f3f"/>
   
-  <!-- Goal post base -->
-  <rect x="84" y="100" width="12" height="50" fill="#ffd700"/>
-  
-  <!-- Left upright -->
-  <rect x="54" y="40" width="10" height="60" fill="#ffd700"/>
-  
-  <!-- Right upright -->
-  <rect x="116" y="40" width="10" height="60" fill="#ffd700"/>
-  
-  <!-- Crossbar -->
-  <rect x="54" y="94" width="72" height="10" fill="#ffd700"/>
-  
   <!-- Field grass texture lines -->
   <line x1="20" y1="130" x2="160" y2="130" stroke="#c0c0c0" stroke-width="4" opacity="0.6"/>
   <line x1="20" y1="140" x2="160" y2="140" stroke="#c0c0c0" stroke-width="4" opacity="0.6"/>
@@ -26,9 +14,15 @@
   <line x1="84" y1="120" x2="96" y2="120" stroke="#fff" stroke-width="2" opacity="0.8"/>
   <line x1="84" y1="130" x2="96" y2="130" stroke="#fff" stroke-width="2" opacity="0.8"/>
   
-  <!-- Football -->
-  <ellipse cx="90" cy="120" rx="8" ry="5" fill="#8b4513"/>
-  <line x1="82" y1="120" x2="98" y2="120" stroke="#fff" stroke-width="1"/>
-  <line x1="86" y1="117" x2="86" y2="123" stroke="#fff" stroke-width="0.5"/>
-  <line x1="94" y1="117" x2="94" y2="123" stroke="#fff" stroke-width="0.5"/>
+  <!-- Goal post base -->
+  <rect x="84" y="100" width="12" height="50" fill="#ffd700"/>
+  
+  <!-- Left upright -->
+  <rect x="54" y="40" width="10" height="60" fill="#ffd700"/>
+  
+  <!-- Right upright -->
+  <rect x="116" y="40" width="10" height="60" fill="#ffd700"/>
+  
+  <!-- Crossbar -->
+  <rect x="54" y="94" width="72" height="10" fill="#ffd700"/>
 </svg>

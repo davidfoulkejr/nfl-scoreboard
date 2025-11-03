@@ -5,6 +5,19 @@
   <!-- Background circle (smaller to account for masking) -->
   <circle cx="96" cy="96" r="70" fill="#1a5f3f" stroke="#fff" stroke-width="4"/>
   
+  <!-- Field grass texture lines (clipped to circle) -->
+  <defs>
+    <clipPath id="circleClipMaskable192">
+      <circle cx="96" cy="96" r="68"/>
+    </clipPath>
+  </defs>
+  
+  <g clip-path="url(#circleClipMaskable192)">
+    <line x1="30" y1="140" x2="162" y2="140" stroke="#c0c0c0" stroke-width="4" opacity="0.6"/>
+    <line x1="30" y1="150" x2="162" y2="150" stroke="#c0c0c0" stroke-width="4" opacity="0.6"/>
+    <line x1="30" y1="160" x2="162" y2="160" stroke="#c0c0c0" stroke-width="4" opacity="0.6"/>
+  </g>
+  
   <!-- Goal post base -->
   <rect x="90" y="104" width="12" height="40" fill="#ffd700"/>
   
@@ -16,21 +29,4 @@
   
   <!-- Crossbar -->
   <rect x="60" y="98" width="72" height="10" fill="#ffd700"/>
-  
-  <!-- Field grass texture lines (clipped to circle) -->
-  <defs>
-    <clipPath id="circleClipMaskable192">
-      <circle cx="96" cy="96" r="70"/>
-    </clipPath>
-  </defs>
-  
-  <g clip-path="url(#circleClipMaskable192)">
-    <line x1="30" y1="140" x2="162" y2="140" stroke="#c0c0c0" stroke-width="4" opacity="0.6"/>
-    <line x1="30" y1="150" x2="162" y2="150" stroke="#c0c0c0" stroke-width="4" opacity="0.6"/>
-    <line x1="30" y1="160" x2="162" y2="160" stroke="#c0c0c0" stroke-width="4" opacity="0.6"/>
-  </g>
-  
-  <!-- Small football -->
-  <ellipse cx="96" cy="125" rx="6" ry="3" fill="#8b4513"/>
-  <line x1="90" y1="125" x2="102" y2="125" stroke="#fff" stroke-width="1"/>
 </svg>
