@@ -17,7 +17,6 @@ class APIService {
 
         try {
             const results = await Promise.allSettled(weekPromises);
-            let hasOfflineData = false;
             
             // Process successful results
             results.forEach((result, index) => {
@@ -28,8 +27,6 @@ class APIService {
                     // Only cache non-offline responses
                     if (!result.value.offline) {
                         this.cache.set(weekNumber, result.value);
-                    } else {
-                        hasOfflineData = true;
                     }
                 }
             });
