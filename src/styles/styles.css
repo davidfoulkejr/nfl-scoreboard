@@ -88,6 +88,24 @@ body {
     }
 }
 
+.offline-indicator {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffc107;
+}
+
+.offline-indicator.visible {
+    display: flex;
+}
+
+.offline-icon {
+    font-size: 1rem;
+}
+
 /* Main Container */
 .main-container {
     max-width: 1200px;
@@ -775,6 +793,13 @@ body {
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--border-color);
+    background-color: var(--background-color);
+    transition: var(--transition);
+}
+
+.leader-photo[src*="player-fallback.svg"] {
+    padding: 8px;
+    background-color: var(--card-background);
 }
 
 .leader-info {

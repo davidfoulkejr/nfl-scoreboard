@@ -110,14 +110,19 @@ class ScoreboardView {
         const weekData = this.weekData?.get(weekNumber);
         
         if (!weekData) {
-            this.elements.noGames.classList.add('visible');
-            this.elements.gamesContainer.classList.remove('visible');
+            this.showNoGamesMessage(`No data available for Week ${weekNumber}`);
             return;
         }
 
         // Update week info
         this.elements.currentWeekTitle.textContent = `Week ${weekNumber}`;
         this.elements.weekSelect.value = weekNumber;
+        
+        // Handle offline data
+        if (weekData.offline) {
+            this.showNoGamesMessage(weekData.error || 'No cached games available for this week - connect to internet to load games');
+            return;
+        }
         
         // Calculate and display week date range
         const dateRange = this.calculateWeekDateRange(weekData.events);
@@ -131,11 +136,22 @@ class ScoreboardView {
             this.elements.noGames.classList.remove('visible');
             this.elements.noGames.style.display = 'none';
         } else {
-            this.elements.noGames.classList.add('visible');
-            this.elements.noGames.style.display = 'block';
-            this.elements.gamesContainer.classList.remove('visible');
-            this.elements.gamesContainer.style.display = 'none';
+            this.showNoGamesMessage(`No games scheduled for Week ${weekNumber}`);
         }
+    }
+
+    // Show no games message with custom text
+    showNoGamesMessage(message) {
+        // Update the message text if there's a message element
+        const messageElement = this.elements.noGames.querySelector('p');
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
+        
+        this.elements.noGames.classList.add('visible');
+        this.elements.noGames.style.display = 'block';
+        this.elements.gamesContainer.classList.remove('visible');
+        this.elements.gamesContainer.style.display = 'none';
     }
 
     // Calculate date range for the week

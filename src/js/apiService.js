@@ -17,18 +17,32 @@ class APIService {
 
         try {
             const results = await Promise.allSettled(weekPromises);
+            let hasOfflineData = false;
             
             // Process successful results
             results.forEach((result, index) => {
                 if (result.status === 'fulfilled' && result.value) {
                     const weekNumber = index + 1;
                     weekData.set(weekNumber, result.value);
-                    this.cache.set(weekNumber, result.value);
+                    
+                    // Only cache non-offline responses
+                    if (!result.value.offline) {
+                        this.cache.set(weekNumber, result.value);
+                    } else {
+                        hasOfflineData = true;
+                    }
                 }
             });
 
-            return weekData;
+            // If we have any data (cached or live), return it
+            if (weekData.size > 0) {
+                return weekData;
+            }
+            
+            // No data at all - return empty map
+            return new Map();
         } catch (error) {
+            console.error('Error loading week data:', error);
             return new Map();
         }
     }
@@ -51,7 +65,13 @@ class APIService {
 
             const data = await response.json();
             
-            // Validate data structure
+            // Check if this is an offline response from service worker
+            if (data.offline) {
+                console.log('Received offline response from service worker');
+                return data; // Return the offline response as-is
+            }
+            
+            // Validate data structure for live data
             if (!data.events || !Array.isArray(data.events)) {
                 return null;
             }
@@ -62,8 +82,32 @@ class APIService {
             return data;
 
         } catch (error) {
+            // Check if this might be an offline response from service worker
+            if (error.message && error.message.includes('offline')) {
+                console.log('Detected offline mode from service worker');
+                // Return cached data if available
+                return this.cache.get(weekNumber) || null;
+            }
+            
+            console.warn(`Failed to fetch week ${weekNumber} data:`, error.message);
             return null;
         }
+    }
+
+    // Check if we're currently offline
+    isOffline() {
+        return !navigator.onLine;
+    }
+
+    // Get offline status message
+    getOfflineStatus() {
+        if (this.isOffline()) {
+            return {
+                offline: true,
+                message: 'You are currently offline. Showing cached data where available.'
+            };
+        }
+        return { offline: false };
     }
 
     // Get cached week data
