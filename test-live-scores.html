@@ -1,237 +1,242 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NFL Scoreboard Test - Live Scores</title>
     <style>
-        /* Inline styles for testing */
-        :root {
-            --primary-color: #013369;
-            --secondary-color: #d50a0a;
-            --background-color: #f5f5f5;
-            --card-background: #ffffff;
-            --text-primary: #333333;
-            --text-secondary: #666666;
-            --border-color: #e0e0e0;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            --border-radius: 8px;
-        }
+      /* Inline styles for testing */
+      :root {
+        --primary-color: #013369;
+        --secondary-color: #d50a0a;
+        --background-color: #f5f5f5;
+        --card-background: #ffffff;
+        --text-primary: #333333;
+        --text-secondary: #666666;
+        --border-color: #e0e0e0;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --border-radius: 8px;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 20px;
-        }
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-primary);
+        margin: 0;
+        padding: 20px;
+      }
 
-        .game-card {
-            background: var(--card-background);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
+      .game-card {
+        background: var(--card-background);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
 
-        .game-header {
-            padding: 1rem;
-            background: linear-gradient(135deg, var(--primary-color), #0747a6);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+      .game-header {
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary-color), #0747a6);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-        .game-status.live {
-            background-color: #dc3545;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 15px;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
+      .game-status.live {
+        background-color: #dc3545;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.8rem;
+      }
 
-        .teams-container {
-            padding: 1.5rem;
-        }
+      .teams-container {
+        padding: 1.5rem;
+      }
 
-        .team-matchup {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+      .team-matchup {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-        .team {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex: 1;
-        }
+      .team {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+      }
 
-        .team-logo {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-        }
+      .team-logo {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+      }
 
-        .team-info {
-            flex: 1;
-        }
+      .team-info {
+        flex: 1;
+      }
 
-        .team-name {
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
+      .team-name {
+        font-weight: 700;
+        font-size: 1.2rem;
+      }
 
-        .team-city {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
+      .team-city {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
 
-        .team-score {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
+      .team-score {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
 
-        .vs-separator {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin: 0 1rem;
-        }
+      .vs-separator {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        margin: 0 1rem;
+      }
 
-        .game-details {
-            background-color: #f8f9fa;
-            padding: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
+      .game-details {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+      }
 
-        .venue-info {
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-        }
+      .venue-info {
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+      }
 
-        .live-game-info {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 0.75rem;
-        }
+      .live-game-info {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 0.75rem;
+      }
 
-        .game-clock {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
+      .game-clock {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
 
-        .possession-info {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            margin-bottom: 0.25rem;
-        }
+      .possession-info {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+      }
 
-        .down-distance {
-            text-align: center;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
+      .down-distance {
+        text-align: center;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>NFL Scoreboard Test - Live Scores</h1>
     <p>Testing the live score display with sample in-progress game data.</p>
-    
+
     <div id="test-container"></div>
 
     <script type="module">
-        // Sample data for testing - simplified version of an in-progress game
-        const sampleGame = {
-            "id": "401772765",
-            "date": "2025-11-02T18:00Z",
-            "name": "Chicago Bears at Cincinnati Bengals",
-            "shortName": "CHI @ CIN",
-            "competitions": [{
-                "id": "401772765",
-                "venue": {
-                    "fullName": "Paycor Stadium",
-                    "address": {
-                        "city": "Cincinnati"
-                    }
+      // Sample data for testing - simplified version of an in-progress game
+      const sampleGame = {
+        id: '401772765',
+        date: '2025-11-02T18:00Z',
+        name: 'Chicago Bears at Cincinnati Bengals',
+        shortName: 'CHI @ CIN',
+        competitions: [
+          {
+            id: '401772765',
+            venue: {
+              fullName: 'Paycor Stadium',
+              address: {
+                city: 'Cincinnati',
+              },
+            },
+            competitors: [
+              {
+                id: '4',
+                type: 'team',
+                homeAway: 'home',
+                team: {
+                  id: '4',
+                  location: 'Cincinnati',
+                  name: 'Bengals',
+                  abbreviation: 'CIN',
+                  displayName: 'Cincinnati Bengals',
+                  logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/cin.png',
                 },
-                "competitors": [
-                    {
-                        "id": "4",
-                        "type": "team",
-                        "homeAway": "home",
-                        "team": {
-                            "id": "4",
-                            "location": "Cincinnati",
-                            "name": "Bengals", 
-                            "abbreviation": "CIN",
-                            "displayName": "Cincinnati Bengals",
-                            "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/cin.png"
-                        },
-                        "score": "27"
-                    },
-                    {
-                        "id": "3",
-                        "type": "team",
-                        "homeAway": "away",
-                        "team": {
-                            "id": "3",
-                            "location": "Chicago",
-                            "name": "Bears",
-                            "abbreviation": "CHI", 
-                            "displayName": "Chicago Bears",
-                            "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/chi.png"
-                        },
-                        "score": "31"
-                    }
-                ],
-                "status": {
-                    "clock": 117.0,
-                    "displayClock": "1:57",
-                    "period": 3,
-                    "type": {
-                        "id": "2",
-                        "name": "STATUS_IN_PROGRESS", 
-                        "state": "in",
-                        "completed": false,
-                        "description": "In Progress",
-                        "detail": "1:57 - 3rd Quarter",
-                        "shortDetail": "1:57 - 3rd"
-                    }
+                score: '27',
+              },
+              {
+                id: '3',
+                type: 'team',
+                homeAway: 'away',
+                team: {
+                  id: '3',
+                  location: 'Chicago',
+                  name: 'Bears',
+                  abbreviation: 'CHI',
+                  displayName: 'Chicago Bears',
+                  logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/chi.png',
                 },
-                "situation": {
-                    "possession": "3",
-                    "shortDownDistanceText": "3rd & 14"
-                }
-            }]
-        };
+                score: '31',
+              },
+            ],
+            status: {
+              clock: 117.0,
+              displayClock: '1:57',
+              period: 3,
+              type: {
+                id: '2',
+                name: 'STATUS_IN_PROGRESS',
+                state: 'in',
+                completed: false,
+                description: 'In Progress',
+                detail: '1:57 - 3rd Quarter',
+                shortDetail: '1:57 - 3rd',
+              },
+            },
+            situation: {
+              possession: '3',
+              shortDownDistanceText: '3rd & 14',
+            },
+          },
+        ],
+      };
 
-        // Simulate the scoreboard view functions
-        class TestScoreboard {
-            createTeamHTML(competitor, status) {
-                const team = competitor.team;
-                const score = competitor.score || '0';
-                const isWinner = competitor.winner || false;
-                const showScore = status.type.state === 'in' || status.type.state === 'post';
-                
-                const logoUrl = team.logo || `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation.toLowerCase()}.png`;
-                
-                return `
+      // Simulate the scoreboard view functions
+      class TestScoreboard {
+        createTeamHTML(competitor, status) {
+          const team = competitor.team;
+          const score = competitor.score || '0';
+          const isWinner = competitor.winner || false;
+          const showScore =
+            status.type.state === 'in' || status.type.state === 'post';
+
+          const logoUrl =
+            team.logo ||
+            `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation.toLowerCase()}.png`;
+
+          return `
                     <div class="team">
                         <img src="${logoUrl}" alt="${team.displayName}" class="team-logo">
                         <div class="team-info">
@@ -241,52 +246,59 @@
                         ${showScore ? `<div class="team-score">${score}</div>` : ''}
                     </div>
                 `;
-            }
+        }
 
-            formatPeriod(period) {
-                switch (period) {
-                    case 1: return '1st';
-                    case 2: return '2nd';
-                    case 3: return '3rd';
-                    case 4: return '4th';
-                    default: return `${period > 4 ? 'OT' : period}`;
-                }
-            }
+        formatPeriod(period) {
+          switch (period) {
+            case 1:
+              return '1st';
+            case 2:
+              return '2nd';
+            case 3:
+              return '3rd';
+            case 4:
+              return '4th';
+            default:
+              return `${period > 4 ? 'OT' : period}`;
+          }
+        }
 
-            createSituationInfo(competition) {
-                if (!competition.situation) return '';
-                
-                const situation = competition.situation;
-                let situationHTML = '';
-                
-                if (situation.possession) {
-                    const possessionTeam = competition.competitors.find(c => c.id === situation.possession);
-                    if (possessionTeam) {
-                        situationHTML += `
+        createSituationInfo(competition) {
+          if (!competition.situation) return '';
+
+          const situation = competition.situation;
+          let situationHTML = '';
+
+          if (situation.possession) {
+            const possessionTeam = competition.competitors.find(
+              c => c.id === situation.possession
+            );
+            if (possessionTeam) {
+              situationHTML += `
                             <div class="possession-info">
                                 <span class="possession-icon">🏈</span>
                                 <span>${possessionTeam.team.abbreviation} has possession</span>
                             </div>
                         `;
-                    }
-                }
-                
-                if (situation.shortDownDistanceText) {
-                    situationHTML += `
+            }
+          }
+
+          if (situation.shortDownDistanceText) {
+            situationHTML += `
                         <div class="down-distance">
                             ${situation.shortDownDistanceText}
                         </div>
                     `;
-                }
-                
-                return situationHTML;
-            }
+          }
 
-            createGameDetailsHTML(competition, status) {
-                let detailsHTML = '';
-                
-                if (status.type.state === 'in') {
-                    detailsHTML += `
+          return situationHTML;
+        }
+
+        createGameDetailsHTML(competition, status) {
+          let detailsHTML = '';
+
+          if (status.type.state === 'in') {
+            detailsHTML += `
                         <div class="live-game-info">
                             <div class="game-clock">
                                 <span class="clock-icon">🕐</span>
@@ -295,40 +307,44 @@
                             ${this.createSituationInfo(competition)}
                         </div>
                     `;
-                }
-                
-                return detailsHTML;
-            }
+          }
 
-            getStatusClass(status) {
-                switch (status.type.state) {
-                    case 'pre': return 'scheduled';
-                    case 'in': return 'live';
-                    case 'post': return 'completed';
-                    default: return 'scheduled';
-                }
-            }
+          return detailsHTML;
+        }
 
-            createGameCard(event) {
-                const competition = event.competitions[0];
-                const status = competition.status;
-                const competitors = competition.competitors;
-                
-                const homeTeam = competitors.find(c => c.homeAway === 'home');
-                const awayTeam = competitors.find(c => c.homeAway === 'away');
-                
-                const gameDate = new Date(event.date);
-                const dateStr = gameDate.toLocaleDateString('en-US', { 
-                    weekday: 'short', 
-                    month: 'short', 
-                    day: 'numeric' 
-                });
-                const timeStr = gameDate.toLocaleTimeString('en-US', { 
-                    hour: 'numeric', 
-                    minute: '2-digit'
-                });
+        getStatusClass(status) {
+          switch (status.type.state) {
+            case 'pre':
+              return 'scheduled';
+            case 'in':
+              return 'live';
+            case 'post':
+              return 'completed';
+            default:
+              return 'scheduled';
+          }
+        }
 
-                return `
+        createGameCard(event) {
+          const competition = event.competitions[0];
+          const status = competition.status;
+          const competitors = competition.competitors;
+
+          const homeTeam = competitors.find(c => c.homeAway === 'home');
+          const awayTeam = competitors.find(c => c.homeAway === 'away');
+
+          const gameDate = new Date(event.date);
+          const dateStr = gameDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+          });
+          const timeStr = gameDate.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+          });
+
+          return `
                     <div class="game-card">
                         <div class="game-header">
                             <div class="game-date">${dateStr}</div>
@@ -350,13 +366,13 @@
                         </div>
                     </div>
                 `;
-            }
         }
+      }
 
-        // Test the functionality
-        const scoreboard = new TestScoreboard();
-        const gameCardHTML = scoreboard.createGameCard(sampleGame);
-        document.getElementById('test-container').innerHTML = gameCardHTML;
+      // Test the functionality
+      const scoreboard = new TestScoreboard();
+      const gameCardHTML = scoreboard.createGameCard(sampleGame);
+      document.getElementById('test-container').innerHTML = gameCardHTML;
     </script>
-</body>
+  </body>
 </html>

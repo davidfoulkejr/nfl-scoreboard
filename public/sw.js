@@ -5,67 +5,69 @@ const API_CACHE_NAME = 'nfl-api-v2';
 
 // Core resources that are always available (these paths don't change)
 const CORE_RESOURCES = [
-  '/',  // This will be handled by the server (Vite dev server or production server)
+  '/', // This will be handled by the server (Vite dev server or production server)
   '/favicon.svg',
   '/manifest.json',
   '/team-colors.json',
   '/icons/player-fallback.svg',
-  '/icons/apple-touch-icon.svg'
+  '/icons/apple-touch-icon.svg',
 ];
 
 // Pattern-based caching for production build assets
 const ASSET_PATTERNS = [
-  /\/assets\/.*\.(js|css|woff2?|ttf|eot)$/,  // Vite bundled assets
-  /\/icons\/.*\.(svg|png|jpg|jpeg|ico)$/     // App icons
+  /\/assets\/.*\.(js|css|woff2?|ttf|eot)$/, // Vite bundled assets
+  /\/icons\/.*\.(svg|png|jpg|jpeg|ico)$/, // App icons
 ];
 
 // API endpoints we want to cache
 const API_PATTERNS = [
-  /https:\/\/site\.api\.espn\.com\/apis\/site\/v2\/sports\/football\/nfl\/scoreboard(\?.*)?/
+  /https:\/\/site\.api\.espn\.com\/apis\/site\/v2\/sports\/football\/nfl\/scoreboard(\?.*)?/,
 ];
 
 // Install event - cache core resources and discover assets
 self.addEventListener('install', event => {
   console.log('[SW] Installing service worker...');
-  
+
   event.waitUntil(
     Promise.all([
       // Cache core resources that exist
-      caches.open(STATIC_CACHE_NAME)
-        .then(cache => {
-          console.log('[SW] Caching core resources');
-          return cacheResourcesSafely(cache, CORE_RESOURCES);
-        }),
-      
+      caches.open(STATIC_CACHE_NAME).then(cache => {
+        console.log('[SW] Caching core resources');
+        return cacheResourcesSafely(cache, CORE_RESOURCES);
+      }),
+
       // Discover and cache bundled assets by fetching index.html
-      discoverAndCacheAssets()
+      discoverAndCacheAssets(),
     ])
-    .then(() => {
-      console.log('[SW] Resources cached successfully');
-      // Force the waiting service worker to become the active service worker
-      return self.skipWaiting();
-    })
-    .catch(error => {
-      console.error('[SW] Failed to cache resources:', error);
-      // Still proceed with installation even if some caching fails
-      return self.skipWaiting();
-    })
+      .then(() => {
+        console.log('[SW] Resources cached successfully');
+        // Force the waiting service worker to become the active service worker
+        return self.skipWaiting();
+      })
+      .catch(error => {
+        console.error('[SW] Failed to cache resources:', error);
+        // Still proceed with installation even if some caching fails
+        return self.skipWaiting();
+      })
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
   console.log('[SW] Activating service worker...');
-  
+
   event.waitUntil(
-    caches.keys()
+    caches
+      .keys()
       .then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
             // Delete old versions of our caches
-            if (cacheName !== STATIC_CACHE_NAME && 
-                cacheName !== API_CACHE_NAME && 
-                cacheName !== CACHE_NAME) {
+            if (
+              cacheName !== STATIC_CACHE_NAME &&
+              cacheName !== API_CACHE_NAME &&
+              cacheName !== CACHE_NAME
+            ) {
               console.log('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
@@ -84,27 +86,29 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
-  
+
   // Handle API requests (ESPN NFL data) - check this first since they're external
   if (API_PATTERNS.some(pattern => pattern.test(request.url))) {
     event.respondWith(handleApiRequest(request));
     return;
   }
-  
+
   // Only handle same-origin requests for static resources
   if (url.origin !== location.origin) {
     return;
   }
-  
+
   // Handle navigation requests (for SPA routing)
-  if (request.mode === 'navigate' || 
-      (request.method === 'GET' && 
-       request.headers.get('accept') && 
-       request.headers.get('accept').includes('text/html'))) {
+  if (
+    request.mode === 'navigate' ||
+    (request.method === 'GET' &&
+      request.headers.get('accept') &&
+      request.headers.get('accept').includes('text/html'))
+  ) {
     event.respondWith(handleNavigationRequest(request));
     return;
   }
-  
+
   // Handle static resources and bundled assets
   if (request.method === 'GET') {
     event.respondWith(handleStaticRequest(request));
@@ -114,19 +118,20 @@ self.addEventListener('fetch', event => {
 // Strategy for Navigation requests: Always serve cached index.html for SPA
 async function handleNavigationRequest(request) {
   const cache = await caches.open(STATIC_CACHE_NAME);
-  
+
   // Always serve cached index.html for navigation requests
   // This allows the SPA router to handle hash-based routing client-side
-  const cachedIndex = await cache.match('/index.html') || await cache.match('/');
-  
+  const cachedIndex =
+    (await cache.match('/index.html')) || (await cache.match('/'));
+
   if (cachedIndex) {
     return cachedIndex;
   }
-  
+
   // If no cached index, try network
   try {
     const response = await fetch('/index.html');
-    
+
     if (response.ok) {
       // Cache the response for next time
       cache.put('/', response.clone());
@@ -136,9 +141,10 @@ async function handleNavigationRequest(request) {
   } catch (error) {
     // Continue to fallback
   }
-  
+
   // Final fallback: offline page
-  return new Response(`
+  return new Response(
+    `
     <!DOCTYPE html>
     <html>
     <head>
@@ -186,47 +192,49 @@ async function handleNavigationRequest(request) {
       </div>
     </body>
     </html>
-  `, {
-    headers: { 'Content-Type': 'text/html' },
-    status: 200
-  });
+  `,
+    {
+      headers: { 'Content-Type': 'text/html' },
+      status: 200,
+    }
+  );
 }
 
 // Strategy for API requests: Network First with Cache Fallback
 async function handleApiRequest(request) {
   const cache = await caches.open(API_CACHE_NAME);
-  
+
   try {
     // Try network first for fresh data
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       // Cache the fresh response
       await cache.put(request, networkResponse.clone());
       return networkResponse;
     }
     throw new Error(`HTTP ${networkResponse.status}`);
-    
   } catch (error) {
     // Network failed, try cache
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // No cache available, return offline indicator response
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         events: [],
         leagues: [],
         offline: true,
-        error: 'No cached data available - please connect to internet to load games'
+        error:
+          'No cached data available - please connect to internet to load games',
       }),
-      { 
+      {
         status: 200,
         statusText: 'OK',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }
@@ -236,33 +244,34 @@ async function handleApiRequest(request) {
 async function handleStaticRequest(request) {
   const cache = await caches.open(STATIC_CACHE_NAME);
   const url = new URL(request.url);
-  
+
   // Try cache first
   const cachedResponse = await cache.match(request);
   if (cachedResponse) {
     return cachedResponse;
   }
-  
+
   // Not in cache, try network
   try {
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       // Cache if it's a core resource or matches asset patterns
-      const shouldCache = CORE_RESOURCES.includes(url.pathname) ||
-                         ASSET_PATTERNS.some(pattern => pattern.test(url.pathname));
-      
+      const shouldCache =
+        CORE_RESOURCES.includes(url.pathname) ||
+        ASSET_PATTERNS.some(pattern => pattern.test(url.pathname));
+
       if (shouldCache) {
         cache.put(request, networkResponse.clone());
       }
     }
-    
+
     return networkResponse;
   } catch (error) {
     // Return 404 for missing static resources when offline
-    return new Response('Resource not available offline', { 
+    return new Response('Resource not available offline', {
       status: 404,
-      statusText: 'Not Found'
+      statusText: 'Not Found',
     });
   }
 }
@@ -285,18 +294,18 @@ self.addEventListener('message', event => {
 async function discoverAndCacheAssets() {
   try {
     const cache = await caches.open(STATIC_CACHE_NAME);
-    
+
     // Fetch index.html to discover bundled asset URLs
     const response = await fetch('/index.html');
     const html = await response.text();
-    
+
     // Cache the index.html under both keys
     await cache.put('/', response.clone());
     await cache.put('/index.html', response.clone());
-    
+
     // Extract asset URLs from HTML using regex
     const assetUrls = new Set();
-    
+
     // Find CSS links: <link rel="stylesheet" href="/assets/...">
     const cssMatches = html.match(/href="(\/assets\/[^"]+\.css[^"]*)"/g);
     if (cssMatches) {
@@ -305,7 +314,7 @@ async function discoverAndCacheAssets() {
         assetUrls.add(url);
       });
     }
-    
+
     // Find JS script sources: <script src="/assets/...">
     const jsMatches = html.match(/src="(\/assets\/[^"]+\.js[^"]*)"/g);
     if (jsMatches) {
@@ -314,12 +323,11 @@ async function discoverAndCacheAssets() {
         assetUrls.add(url);
       });
     }
-    
+
     // Cache discovered assets
     if (assetUrls.size > 0) {
       await cache.addAll(Array.from(assetUrls));
     }
-    
   } catch (error) {
     // Don't throw - let the service worker install anyway
   }
@@ -333,10 +341,10 @@ async function clearAllCaches() {
 
 // Safely cache resources, skipping any that don't exist
 async function cacheResourcesSafely(cache, resources) {
-  const cachePromises = resources.map(async (resource) => {
+  const cachePromises = resources.map(async resource => {
     try {
       const response = await fetch(resource);
-      
+
       if (response.ok) {
         await cache.put(resource, response);
       }
@@ -344,7 +352,7 @@ async function cacheResourcesSafely(cache, resources) {
       // Don't throw - just skip this resource and continue
     }
   });
-  
+
   // Wait for all cache attempts to complete
   await Promise.all(cachePromises);
 }

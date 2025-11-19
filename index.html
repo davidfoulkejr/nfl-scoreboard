@@ -1,172 +1,185 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NFL Scoreboard - 2025 Season</title>
-    
+
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
     <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
+    <link rel="manifest" href="/manifest.json" />
+
     <!-- Theme colors -->
-    <meta name="theme-color" content="#013369">
-    <meta name="msapplication-TileColor" content="#013369">
-    
+    <meta name="theme-color" content="#013369" />
+    <meta name="msapplication-TileColor" content="#013369" />
+
     <!-- iOS specific meta tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="NFL Scores">
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
-    
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="NFL Scores" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/icons/apple-touch-icon.png"
+    />
+
     <!-- Additional PWA icons -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
-</head>
-<body>
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/icons/icon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/icons/icon-512x512.png"
+    />
+  </head>
+  <body>
     <header class="header">
-        <div class="header-content">
-            <h1 class="main-title">NFL Scoreboard</h1>
-            <div class="season-info">2025 Regular Season</div>
-            <div id="live-indicator" class="live-indicator">
-                <span class="live-dot"></span>
-                <span>LIVE - Auto-refreshing every 30s</span>
-            </div>
-            <div id="offline-indicator" class="offline-indicator">
-                <span class="offline-icon">📱</span>
-                <span>Offline - Showing cached data</span>
-            </div>
+      <div class="header-content">
+        <h1 class="main-title">NFL Scoreboard</h1>
+        <div class="season-info">2025 Regular Season</div>
+        <div id="live-indicator" class="live-indicator">
+          <span class="live-dot"></span>
+          <span>LIVE - Auto-refreshing every 30s</span>
         </div>
+        <div id="offline-indicator" class="offline-indicator">
+          <span class="offline-icon">📱</span>
+          <span>Offline - Showing cached data</span>
+        </div>
+      </div>
     </header>
 
     <main class="main-container">
-        <!-- Loading State -->
-        <div id="loading" class="loading-container">
-            <div class="spinner"></div>
-            <p>Loading NFL schedule...</p>
+      <!-- Loading State -->
+      <div id="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading NFL schedule...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="error" class="error-container">
+        <div class="error-content">
+          <h2>Unable to Load Schedule</h2>
+          <p>Please check your internet connection and try again.</p>
+          <button id="retry-btn" class="retry-button">Retry</button>
+        </div>
+      </div>
+
+      <!-- Week Navigation -->
+      <nav id="week-navigation" class="week-navigation">
+        <div class="nav-container">
+          <button id="prev-week" class="nav-button nav-button--prev" disabled>
+            <span class="nav-arrow">←</span>
+            Previous
+          </button>
+
+          <div class="current-week-info">
+            <h2 id="current-week-title" class="week-title">Week 1</h2>
+            <p id="current-week-dates" class="week-dates">Sep 4 - Sep 9</p>
+          </div>
+
+          <button id="next-week" class="nav-button nav-button--next">
+            Next
+            <span class="nav-arrow">→</span>
+          </button>
         </div>
 
-        <!-- Error State -->
-        <div id="error" class="error-container">
-            <div class="error-content">
-                <h2>Unable to Load Schedule</h2>
-                <p>Please check your internet connection and try again.</p>
-                <button id="retry-btn" class="retry-button">Retry</button>
-            </div>
+        <!-- Week Selector Dropdown -->
+        <div class="week-selector">
+          <label for="week-select">Jump to Week:</label>
+          <select id="week-select">
+            <!-- Populated by JavaScript -->
+          </select>
         </div>
+      </nav>
 
-        <!-- Week Navigation -->
-        <nav id="week-navigation" class="week-navigation">
-            <div class="nav-container">
-                <button id="prev-week" class="nav-button nav-button--prev" disabled>
-                    <span class="nav-arrow">←</span>
-                    Previous
-                </button>
-                
-                <div class="current-week-info">
-                    <h2 id="current-week-title" class="week-title">Week 1</h2>
-                    <p id="current-week-dates" class="week-dates">Sep 4 - Sep 9</p>
-                </div>
-                
-                <button id="next-week" class="nav-button nav-button--next">
-                    Next
-                    <span class="nav-arrow">→</span>
-                </button>
-            </div>
-            
-            <!-- Week Selector Dropdown -->
-            <div class="week-selector">
-                <label for="week-select">Jump to Week:</label>
-                <select id="week-select">
-                    <!-- Populated by JavaScript -->
-                </select>
-            </div>
+      <!-- Games Container -->
+      <section id="games-container" class="games-container">
+        <div id="games-grid" class="games-grid">
+          <!-- Game cards will be populated by JavaScript -->
+        </div>
+      </section>
+
+      <!-- No Games Message -->
+      <div id="no-games" class="no-games-message">
+        <p>No games scheduled for this week.</p>
+      </div>
+
+      <!-- Game Detail View -->
+      <section id="game-detail-container" class="game-detail-container">
+        <!-- Back Navigation -->
+        <nav class="game-detail-nav">
+          <button id="back-to-scoreboard" class="back-button">
+            <span class="back-arrow">←</span>
+            Back to Scoreboard
+          </button>
         </nav>
 
-        <!-- Games Container -->
-        <section id="games-container" class="games-container">
-            <div id="games-grid" class="games-grid">
-                <!-- Game cards will be populated by JavaScript -->
-            </div>
-        </section>
-
-        <!-- No Games Message -->
-        <div id="no-games" class="no-games-message">
-            <p>No games scheduled for this week.</p>
+        <!-- Game Detail Header -->
+        <div id="game-detail-header" class="game-detail-header">
+          <!-- Populated by JavaScript -->
         </div>
-    </main>
 
-        <!-- Game Detail View -->
-        <section id="game-detail-container" class="game-detail-container">
-            <!-- Back Navigation -->
-            <nav class="game-detail-nav">
-                <button id="back-to-scoreboard" class="back-button">
-                    <span class="back-arrow">←</span>
-                    Back to Scoreboard
-                </button>
-            </nav>
-
-            <!-- Game Detail Header -->
-            <div id="game-detail-header" class="game-detail-header">
-                <!-- Populated by JavaScript -->
+        <!-- Game Detail Content -->
+        <div class="game-detail-content">
+          <!-- Box Score Section -->
+          <section class="game-section">
+            <h3 class="section-title">Box Score</h3>
+            <div id="box-score-container" class="box-score-container">
+              <!-- Populated by JavaScript -->
             </div>
+          </section>
 
-            <!-- Game Detail Content -->
-            <div class="game-detail-content">
-                <!-- Box Score Section -->
-                <section class="game-section">
-                    <h3 class="section-title">Box Score</h3>
-                    <div id="box-score-container" class="box-score-container">
-                        <!-- Populated by JavaScript -->
-                    </div>
-                </section>
-
-                <!-- Team Leaders Section -->
-                <section class="game-section">
-                    <h3 class="section-title">Game Leaders</h3>
-                    <div id="team-leaders-container" class="team-leaders-container">
-                        <!-- Populated by JavaScript -->
-                    </div>
-                </section>
-
-                <!-- Game Information Section -->
-                <section class="game-section">
-                    <h3 class="section-title">Game Information</h3>
-                    <div id="game-info-container" class="game-info-container">
-                        <!-- Populated by JavaScript -->
-                    </div>
-                </section>
+          <!-- Team Leaders Section -->
+          <section class="game-section">
+            <h3 class="section-title">Game Leaders</h3>
+            <div id="team-leaders-container" class="team-leaders-container">
+              <!-- Populated by JavaScript -->
             </div>
-        </section>
+          </section>
 
-        <!-- Team Schedule View -->
-        <section id="team-schedule-container" class="team-schedule-container">
-            <!-- Back Navigation -->
-            <nav class="team-schedule-nav">
-                <button id="back-from-team-schedule" class="back-button">
-                    <span class="back-arrow">←</span>
-                    Back to Scoreboard
-                </button>
-            </nav>
-
-            <!-- Team Schedule Header -->
-            <div id="team-schedule-header" class="team-schedule-header">
-                <!-- Populated by JavaScript -->
+          <!-- Game Information Section -->
+          <section class="game-section">
+            <h3 class="section-title">Game Information</h3>
+            <div id="game-info-container" class="game-info-container">
+              <!-- Populated by JavaScript -->
             </div>
+          </section>
+        </div>
+      </section>
 
-            <!-- Team Schedule Content -->
-            <div id="team-schedule-games" class="team-schedule-games">
-                <!-- Populated by JavaScript -->
-            </div>
-        </section>
+      <!-- Team Schedule View -->
+      <section id="team-schedule-container" class="team-schedule-container">
+        <!-- Back Navigation -->
+        <nav class="team-schedule-nav">
+          <button id="back-from-team-schedule" class="back-button">
+            <span class="back-arrow">←</span>
+            Back to Scoreboard
+          </button>
+        </nav>
+
+        <!-- Team Schedule Header -->
+        <div id="team-schedule-header" class="team-schedule-header">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Team Schedule Content -->
+        <div id="team-schedule-games" class="team-schedule-games">
+          <!-- Populated by JavaScript -->
+        </div>
+      </section>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2025 NFL Scoreboard. Data provided by ESPN API.</p>
+      <p>&copy; 2025 NFL Scoreboard. Data provided by ESPN API.</p>
     </footer>
 
     <script type="module" src="/src/js/app.js"></script>
-</body>
+  </body>
 </html>
