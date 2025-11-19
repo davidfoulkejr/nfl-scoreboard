@@ -61,8 +61,10 @@ class ScoreboardView {
         for (const [weekNum, data] of this.weekData) {
             if (data.events && data.events.length > 0) {
                 const weekStart = new Date(data.events[0].date);
+                weekStart.setHours(0,0,0,0);
                 const weekEnd = new Date(data.events[data.events.length - 1].date);
-                
+                weekEnd.setHours(0,0,0,0);
+
                 // Add buffer time around the week
                 weekStart.setDate(weekStart.getDate() - 1);
                 weekEnd.setDate(weekEnd.getDate() + 1);
@@ -158,7 +160,7 @@ class ScoreboardView {
     calculateWeekDateRange(events) {
         if (!events || events.length === 0) return '';
         
-        const dates = events.map(event => new Date(event.date)).sort();
+        const dates = events.map(event => new Date(event.date)).sort((a, b) => a - b);
         const startDate = dates[0];
         const endDate = dates[dates.length - 1];
         
