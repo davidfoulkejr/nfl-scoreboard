@@ -67,13 +67,15 @@ class ScoreboardView {
     for (const [weekNum, data] of this.weekData) {
       if (data.events && data.events.length > 0) {
         const weekStart = new Date(data.events[0].date);
-        weekStart.setHours(0, 0, 0, 0);
         const weekEnd = new Date(data.events[data.events.length - 1].date);
-        weekEnd.setHours(0, 0, 0, 0);
 
         // Add buffer time around the week
         weekStart.setDate(weekStart.getDate() - 1);
         weekEnd.setDate(weekEnd.getDate() + 1);
+        
+        today.setUTCHours(0, 0, 0, 0);
+        weekStart.setUTCHours(0, 0, 0, 0);
+        weekEnd.setUTCHours(0, 0, 0, 0);
 
         if (today >= weekStart && today <= weekEnd) {
           return weekNum;
