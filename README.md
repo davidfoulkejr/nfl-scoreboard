@@ -40,6 +40,8 @@ A modern web application that displays NFL scoreboards by week using ESPN's API 
 
 - **Previous/Next Buttons**: Navigate chronologically through weeks
 - **Week Dropdown**: Jump directly to any specific week
+- **Compact Filters**: Narrow the weekly scoreboard by team, game status, or day
+- **Grouped Game Days**: Scan a week quickly with clear daily sections
 - **Date Ranges**: Shows the date span for each week (e.g., "Nov 12 - Nov 16")
 - **Auto-Detection**: Automatically displays the current week on page load
 - **URL-Based Navigation**: Shareable links for specific weeks, games, and team schedules

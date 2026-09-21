@@ -42,15 +42,19 @@
   <body>
     <header class="header">
       <div class="header-content">
-        <h1 class="main-title">NFL Scoreboard</h1>
-        <div class="season-info">2025 Regular Season</div>
-        <div id="live-indicator" class="live-indicator">
-          <span class="live-dot"></span>
-          <span>LIVE - Auto-refreshing every 30s</span>
+        <div>
+          <p class="eyebrow">2025 Regular Season</p>
+          <h1 class="main-title">NFL <span>Scoreboard</span></h1>
         </div>
-        <div id="offline-indicator" class="offline-indicator">
-          <span class="offline-icon">📱</span>
-          <span>Offline - Showing cached data</span>
+        <div class="connection-status" aria-live="polite">
+          <div id="live-indicator" class="live-indicator">
+            <span class="live-dot"></span>
+            <span>Live · 30s</span>
+          </div>
+          <div id="offline-indicator" class="offline-indicator">
+            <span class="offline-icon">Offline</span>
+            <span>Showing cached data</span>
+          </div>
         </div>
       </div>
     </header>
@@ -74,9 +78,14 @@
       <!-- Week Navigation -->
       <nav id="week-navigation" class="week-navigation">
         <div class="nav-container">
-          <button id="prev-week" class="nav-button nav-button--prev" disabled>
-            <span class="nav-arrow">←</span>
-            Previous
+          <button
+            id="prev-week"
+            class="nav-button nav-button--prev"
+            aria-label="Previous week"
+            disabled
+          >
+            <span class="nav-arrow" aria-hidden="true">←</span>
+            <span class="nav-button-label">Previous</span>
           </button>
 
           <div class="current-week-info">
@@ -84,20 +93,59 @@
             <p id="current-week-dates" class="week-dates">Sep 4 - Sep 9</p>
           </div>
 
-          <button id="next-week" class="nav-button nav-button--next">
-            Next
-            <span class="nav-arrow">→</span>
+          <button
+            id="next-week"
+            class="nav-button nav-button--next"
+            aria-label="Next week"
+          >
+            <span class="nav-button-label">Next</span>
+            <span class="nav-arrow" aria-hidden="true">→</span>
           </button>
         </div>
 
-        <!-- Week Selector Dropdown -->
         <div class="week-selector">
-          <label for="week-select">Jump to Week:</label>
+          <label for="week-select">Jump to</label>
           <select id="week-select">
             <!-- Populated by JavaScript -->
           </select>
         </div>
       </nav>
+
+      <!-- Scoreboard Filters -->
+      <section id="scoreboard-toolbar" class="scoreboard-toolbar">
+        <div class="filter-grid">
+          <label class="filter-field">
+            <span>Team</span>
+            <select id="team-filter">
+              <option value="all">All teams</option>
+            </select>
+          </label>
+          <label class="filter-field">
+            <span>Status</span>
+            <select id="status-filter">
+              <option value="all">All games</option>
+              <option value="in">Live</option>
+              <option value="pre">Upcoming</option>
+              <option value="post">Final</option>
+            </select>
+          </label>
+          <label class="filter-field">
+            <span>Game day</span>
+            <select id="day-filter">
+              <option value="all">All days</option>
+            </select>
+          </label>
+          <button id="clear-filters" class="clear-filters" type="button">
+            Clear
+          </button>
+        </div>
+        <div class="scoreboard-summary">
+          <p id="games-summary" aria-live="polite">Showing all games</p>
+          <p class="interaction-hint">
+            Select a team for its schedule · Select a game for details
+          </p>
+        </div>
+      </section>
 
       <!-- Games Container -->
       <section id="games-container" class="games-container">
@@ -177,7 +225,7 @@
     </main>
 
     <footer class="footer">
-      <p>&copy; 2025 NFL Scoreboard. Data provided by ESPN API.</p>
+      <p>NFL Scoreboard · Data provided by ESPN</p>
     </footer>
 
     <script type="module" src="/src/js/app.js"></script>

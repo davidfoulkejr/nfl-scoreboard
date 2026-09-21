@@ -135,6 +135,7 @@ class NFLApp {
   hideAllViews() {
     // Completely hide elements instead of just removing visible class
     const weekNav = document.getElementById('week-navigation');
+    const scoreboardToolbar = document.getElementById('scoreboard-toolbar');
     const gamesContainer = document.getElementById('games-container');
     const gameDetailContainer = document.getElementById(
       'game-detail-container'
@@ -146,6 +147,8 @@ class NFLApp {
 
     weekNav.classList.remove('visible');
     weekNav.style.display = 'none';
+
+    scoreboardToolbar.classList.remove('visible');
 
     gamesContainer.classList.remove('visible');
     gamesContainer.style.display = 'none';

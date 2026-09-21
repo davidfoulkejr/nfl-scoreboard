@@ -5,6 +5,11 @@ class ScoreboardView {
     this.weekData = null;
     this.currentWeek = 1;
     this.regularSeasonWeeks = [];
+    this.filters = {
+      team: 'all',
+      status: 'all',
+      day: 'all',
+    };
 
     this.initializeElements();
     this.bindEvents();
@@ -22,6 +27,12 @@ class ScoreboardView {
       weekSelect: document.getElementById('week-select'),
       currentWeekTitle: document.getElementById('current-week-title'),
       currentWeekDates: document.getElementById('current-week-dates'),
+      toolbar: document.getElementById('scoreboard-toolbar'),
+      teamFilter: document.getElementById('team-filter'),
+      statusFilter: document.getElementById('status-filter'),
+      dayFilter: document.getElementById('day-filter'),
+      clearFilters: document.getElementById('clear-filters'),
+      gamesSummary: document.getElementById('games-summary'),
     };
   }
 
@@ -36,6 +47,21 @@ class ScoreboardView {
     this.elements.weekSelect.addEventListener('change', e =>
       this.goToWeek(parseInt(e.target.value))
     );
+    this.elements.teamFilter.addEventListener('change', e => {
+      this.filters.team = e.target.value;
+      this.applyFilters();
+    });
+    this.elements.statusFilter.addEventListener('change', e => {
+      this.filters.status = e.target.value;
+      this.applyFilters();
+    });
+    this.elements.dayFilter.addEventListener('change', e => {
+      this.filters.day = e.target.value;
+      this.applyFilters();
+    });
+    this.elements.clearFilters.addEventListener('click', () =>
+      this.resetFilters()
+    );
   }
 
   // Initialize with week data
@@ -44,6 +70,7 @@ class ScoreboardView {
     this.regularSeasonWeeks = Array.from(weekData.keys()).sort((a, b) => a - b);
     this.currentWeek = this.findCurrentWeek() || 1;
     this.populateWeekSelector();
+    this.populateTeamFilter();
   }
 
   // Show scoreboard view
@@ -51,6 +78,7 @@ class ScoreboardView {
     // Properly show elements
     this.elements.weekNav.classList.add('visible');
     this.elements.weekNav.style.display = 'block';
+    this.elements.toolbar.classList.add('visible');
 
     if (weekNumber && this.regularSeasonWeeks.includes(weekNumber)) {
       this.currentWeek = weekNumber;
@@ -72,7 +100,7 @@ class ScoreboardView {
         // Add buffer time around the week
         weekStart.setDate(weekStart.getDate() - 1);
         weekEnd.setDate(weekEnd.getDate() + 1);
-        
+
         today.setUTCHours(0, 0, 0, 0);
         weekStart.setUTCHours(0, 0, 0, 0);
         weekEnd.setUTCHours(0, 0, 0, 0);
@@ -140,14 +168,11 @@ class ScoreboardView {
     // Calculate and display week date range
     const dateRange = this.calculateWeekDateRange(weekData.events);
     this.elements.currentWeekDates.textContent = dateRange;
+    this.populateDayFilter(weekData.events);
 
     // Render games
     if (weekData.events && weekData.events.length > 0) {
-      this.renderGames(weekData.events, weekNumber);
-      this.elements.gamesContainer.classList.add('visible');
-      this.elements.gamesContainer.style.display = 'block';
-      this.elements.noGames.classList.remove('visible');
-      this.elements.noGames.style.display = 'none';
+      this.applyFilters();
     } else {
       this.showNoGamesMessage(`No games scheduled for Week ${weekNumber}`);
     }
@@ -165,6 +190,7 @@ class ScoreboardView {
     this.elements.noGames.style.display = 'block';
     this.elements.gamesContainer.classList.remove('visible');
     this.elements.gamesContainer.style.display = 'none';
+    this.elements.gamesSummary.textContent = 'No games available';
   }
 
   // Calculate date range for the week
@@ -200,16 +226,151 @@ class ScoreboardView {
       currentIndex === this.regularSeasonWeeks.length - 1;
   }
 
+  populateTeamFilter() {
+    const teams = new Map();
+
+    for (const weekData of this.weekData.values()) {
+      for (const event of weekData.events || []) {
+        for (const competitor of event.competitions?.[0]?.competitors || []) {
+          teams.set(competitor.team.abbreviation, competitor.team.displayName);
+        }
+      }
+    }
+
+    const options = Array.from(teams.entries())
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(
+        ([abbreviation, name]) =>
+          `<option value="${abbreviation}">${name}</option>`
+      )
+      .join('');
+
+    this.elements.teamFilter.innerHTML =
+      '<option value="all">All teams</option>' + options;
+  }
+
+  populateDayFilter(events) {
+    const selectedDay = this.filters.day;
+    const days = new Map();
+
+    for (const event of events || []) {
+      const date = new Date(event.date);
+      const key = this.getLocalDateKey(date);
+      days.set(
+        key,
+        date.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric',
+        })
+      );
+    }
+
+    const options = Array.from(days.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, label]) => `<option value="${key}">${label}</option>`)
+      .join('');
+
+    this.elements.dayFilter.innerHTML =
+      '<option value="all">All days</option>' + options;
+
+    if (days.has(selectedDay)) {
+      this.elements.dayFilter.value = selectedDay;
+    } else {
+      this.filters.day = 'all';
+    }
+  }
+
+  resetFilters() {
+    this.filters = { team: 'all', status: 'all', day: 'all' };
+    this.elements.teamFilter.value = 'all';
+    this.elements.statusFilter.value = 'all';
+    this.elements.dayFilter.value = 'all';
+    this.applyFilters();
+  }
+
+  applyFilters() {
+    const weekData = this.weekData?.get(this.currentWeek);
+    if (!weekData?.events) return;
+
+    const filteredEvents = weekData.events.filter(event => {
+      const competition = event.competitions?.[0];
+      const matchesTeam =
+        this.filters.team === 'all' ||
+        competition?.competitors?.some(
+          competitor => competitor.team.abbreviation === this.filters.team
+        );
+      const matchesStatus =
+        this.filters.status === 'all' ||
+        competition?.status?.type?.state === this.filters.status;
+      const matchesDay =
+        this.filters.day === 'all' ||
+        this.getLocalDateKey(new Date(event.date)) === this.filters.day;
+
+      return matchesTeam && matchesStatus && matchesDay;
+    });
+
+    this.renderGames(filteredEvents, this.currentWeek);
+    this.updateFilterSummary(filteredEvents.length, weekData.events.length);
+
+    const hasGames = filteredEvents.length > 0;
+    this.elements.gamesContainer.classList.toggle('visible', hasGames);
+    this.elements.gamesContainer.style.display = hasGames ? 'block' : 'none';
+    this.elements.noGames.classList.toggle('visible', !hasGames);
+    this.elements.noGames.style.display = hasGames ? 'none' : 'block';
+
+    if (!hasGames) {
+      this.elements.noGames.querySelector('p').textContent =
+        'No games match these filters.';
+    }
+  }
+
+  updateFilterSummary(filteredCount, totalCount) {
+    const activeFilters = Object.values(this.filters).filter(
+      value => value !== 'all'
+    ).length;
+    const gameLabel = filteredCount === 1 ? 'game' : 'games';
+
+    this.elements.gamesSummary.textContent =
+      activeFilters > 0
+        ? `${filteredCount} of ${totalCount} ${gameLabel}`
+        : `${totalCount} ${totalCount === 1 ? 'game' : 'games'} this week`;
+    this.elements.clearFilters.classList.toggle('visible', activeFilters > 0);
+  }
+
+  getLocalDateKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   // Render all games for a week
   renderGames(events, weekNumber) {
     this.elements.gamesGrid.innerHTML = '';
 
     // Sort events by date
-    const sortedEvents = events.sort(
+    const sortedEvents = [...events].sort(
       (a, b) => new Date(a.date) - new Date(b.date)
     );
 
+    let currentDay = null;
     sortedEvents.forEach(event => {
+      const gameDate = new Date(event.date);
+      const dayKey = this.getLocalDateKey(gameDate);
+
+      if (dayKey !== currentDay) {
+        currentDay = dayKey;
+        const heading = document.createElement('h3');
+        heading.className = 'game-day-heading';
+        heading.textContent = gameDate.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+        });
+        this.elements.gamesGrid.appendChild(heading);
+      }
+
       const gameCard = this.createGameCard(event, weekNumber);
       this.elements.gamesGrid.appendChild(gameCard);
     });
@@ -220,21 +381,28 @@ class ScoreboardView {
     const card = document.createElement('div');
     card.className = 'game-card';
     card.style.cursor = 'pointer';
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `View game details for ${event.name}`);
 
     // Add click handler for navigation to game detail
     card.addEventListener('click', e => {
-      // Check if clicked element is a team name
-      if (
-        e.target.classList.contains('team-name') &&
-        e.target.dataset.teamAbbr
-      ) {
+      const teamButton = e.target.closest('.team-name');
+      if (teamButton?.dataset.teamAbbr) {
         e.stopPropagation();
-        this.app.navigateToTeamSchedule(e.target.dataset.teamAbbr);
+        this.app.navigateToTeamSchedule(teamButton.dataset.teamAbbr);
         return;
       }
 
       // Otherwise navigate to game detail
       this.app.navigateToGame(weekNumber, event.id);
+    });
+    card.addEventListener('keydown', e => {
+      if (e.target.closest('.team-name')) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.app.navigateToGame(weekNumber, event.id);
+      }
     });
 
     const competition = event.competitions[0];
@@ -247,11 +415,6 @@ class ScoreboardView {
 
     // Format game date and time
     const gameDate = new Date(event.date);
-    const dateStr = gameDate.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
     const timeStr = gameDate.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
@@ -260,7 +423,6 @@ class ScoreboardView {
 
     card.innerHTML = `
             <div class="game-header">
-                <div class="game-date">${dateStr}</div>
                 <div class="game-time">${timeStr}</div>
                 <div class="game-status ${this.getStatusClass(status)}">${status.type.shortDetail}</div>
             </div>
@@ -268,15 +430,13 @@ class ScoreboardView {
             <div class="teams-container">
                 <div class="team-matchup">
                     ${this.createTeamHTML(awayTeam, status)}
-                    <div class="vs-separator">@</div>
                     ${this.createTeamHTML(homeTeam, status)}
                 </div>
             </div>
             
             <div class="game-details">
-                <div class="venue-info">${competition.venue.fullName}, ${competition.venue.address.city}</div>
+                <div class="venue-info">${competition.venue?.fullName || 'Venue TBD'}${competition.venue?.address?.city ? ` · ${competition.venue.address.city}` : ''}</div>
                 ${this.createGameDetailsHTML(competition, status)}
-                <div class="click-hint">Click for details</div>
             </div>
         `;
 
@@ -298,11 +458,13 @@ class ScoreboardView {
 
     return `
             <div class="team">
-                <img src="${logoUrl}" alt="${team.displayName}" class="team-logo" 
+                <img src="${logoUrl}" alt="" class="team-logo"
                      onerror="this.src='https://a.espncdn.com/i/teamlogos/nfl/500/default-team.png'">
                 <div class="team-info">
-                    <div class="team-name" data-team-abbr="${team.abbreviation}" title="View ${team.displayName} schedule">${team.location}</div>
-                    <div class="team-city">${team.name}</div>
+                    <button class="team-name" data-team-abbr="${team.abbreviation}" title="View ${team.displayName} schedule">
+                      <span class="team-abbreviation">${team.abbreviation}</span>
+                      <span class="team-city">${team.displayName}</span>
+                    </button>
                 </div>
                 ${showScore ? `<div class="team-score ${isWinner ? 'winner' : ''}">${score}</div>` : ''}
             </div>
