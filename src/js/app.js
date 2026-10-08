@@ -15,10 +15,23 @@ class NFLApp {
     this.teamSchedule = new TeamScheduleView(this);
     this.refreshInterval = null;
 
+    this.updateSeasonBranding();
     this.initializeRouter();
     this.bindEvents();
     this.registerServiceWorker();
     this.loadInitialData();
+  }
+
+  // Keep visible branding aligned with the season requested from ESPN.
+  updateSeasonBranding() {
+    const seasonYear = this.apiService.seasonYear;
+    const seasonLabel = document.getElementById('season-label');
+
+    if (seasonLabel) {
+      seasonLabel.textContent = `${seasonYear} Regular Season`;
+    }
+
+    document.title = `NFL Scoreboard - ${seasonYear} Season`;
   }
 
   // Initialize hash-based routing

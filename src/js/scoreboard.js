@@ -88,30 +88,40 @@ class ScoreboardView {
     this.updateNavigationState();
   }
 
-  // Find the current week based on today's date
-  findCurrentWeek() {
-    const today = new Date();
+  // Select the upcoming week starting Wednesday in the device's local time.
+  findCurrentWeek(today = new Date()) {
+    let currentWeek = null;
+    let latestWeekStart = null;
 
     for (const [weekNum, data] of this.weekData) {
       if (data.events && data.events.length > 0) {
-        const weekStart = new Date(data.events[0].date);
-        const weekEnd = new Date(data.events[data.events.length - 1].date);
+        const gameDates = data.events
+          .map(event => new Date(event.date))
+          .filter(date => !Number.isNaN(date.getTime()));
 
-        // Add buffer time around the week
-        weekStart.setDate(weekStart.getDate() - 1);
-        weekEnd.setDate(weekEnd.getDate() + 1);
+        if (gameDates.length === 0) {
+          continue;
+        }
 
-        today.setUTCHours(0, 0, 0, 0);
-        weekStart.setUTCHours(0, 0, 0, 0);
-        weekEnd.setUTCHours(0, 0, 0, 0);
+        const weekStart = new Date(
+          Math.min(...gameDates.map(date => date.getTime()))
+        );
+        const daysSinceWednesday = (weekStart.getDay() - 3 + 7) % 7;
 
-        if (today >= weekStart && today <= weekEnd) {
-          return weekNum;
+        weekStart.setDate(weekStart.getDate() - daysSinceWednesday);
+        weekStart.setHours(0, 0, 0, 0);
+
+        if (
+          today >= weekStart &&
+          (latestWeekStart === null || weekStart > latestWeekStart)
+        ) {
+          currentWeek = weekNum;
+          latestWeekStart = weekStart;
         }
       }
     }
 
-    return null;
+    return currentWeek;
   }
 
   // Populate week selector dropdown

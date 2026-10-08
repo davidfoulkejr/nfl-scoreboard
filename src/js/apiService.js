@@ -1,8 +1,11 @@
+import { getNFLSeasonYear } from './season.js';
+
 // API Service for ESPN NFL Data
 class APIService {
   constructor() {
     this.baseApiUrl =
       'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
+    this.seasonYear = getNFLSeasonYear();
     this.cache = new Map();
   }
 
@@ -53,7 +56,7 @@ class APIService {
     }
 
     try {
-      const url = `${this.baseApiUrl}?week=${weekNumber}&seasontype=2&year=2025`;
+      const url = `${this.baseApiUrl}?week=${weekNumber}&seasontype=2&year=${this.seasonYear}`;
 
       const response = await fetch(url);
 

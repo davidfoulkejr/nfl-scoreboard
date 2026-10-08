@@ -1,7 +1,7 @@
 {
-  "name": "NFL Scoreboard 2025",
+  "name": "NFL Scoreboard",
   "short_name": "NFL Scores",
-  "description": "Live NFL scores, schedules, and game details for the 2025 season",
+  "description": "Live NFL scores, schedules, and game details",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#013369",

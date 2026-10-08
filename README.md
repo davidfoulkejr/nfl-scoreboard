@@ -289,5 +289,5 @@ Potential improvements could include:
 
 ---
 
-**Built for the 2025 NFL Season**  
+**Built for the current NFL season**
 _Data provided by ESPN API_
