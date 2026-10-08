@@ -6,7 +6,7 @@ class ScoreboardView {
     this.currentWeek = 1;
     this.regularSeasonWeeks = [];
     this.filters = {
-      status: 'all',
+      statuses: new Set(),
     };
 
     this.initializeElements();
@@ -26,8 +26,7 @@ class ScoreboardView {
       currentWeekTitle: document.getElementById('current-week-title'),
       currentWeekDates: document.getElementById('current-week-dates'),
       toolbar: document.getElementById('scoreboard-toolbar'),
-      statusFilter: document.getElementById('status-filter'),
-      clearFilters: document.getElementById('clear-filters'),
+      statusButtons: document.querySelectorAll('#status-filters button'),
       gamesSummary: document.getElementById('games-summary'),
     };
   }
@@ -43,13 +42,11 @@ class ScoreboardView {
     this.elements.weekSelect.addEventListener('change', e =>
       this.goToWeek(parseInt(e.target.value))
     );
-    this.elements.statusFilter.addEventListener('change', e => {
-      this.filters.status = e.target.value;
-      this.applyFilters();
+    this.elements.statusButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        this.toggleStatus(button.dataset.status);
+      });
     });
-    this.elements.clearFilters.addEventListener('click', () =>
-      this.resetFilters()
-    );
   }
 
   // Initialize with week data
@@ -222,21 +219,33 @@ class ScoreboardView {
       currentIndex === this.regularSeasonWeeks.length - 1;
   }
 
-  resetFilters() {
-    this.filters = { status: 'all' };
-    this.elements.statusFilter.value = 'all';
+  toggleStatus(status) {
+    if (this.filters.statuses.has(status)) {
+      this.filters.statuses.delete(status);
+    } else {
+      this.filters.statuses.add(status);
+    }
     this.applyFilters();
   }
 
+  updateStatusControls() {
+    this.elements.statusButtons.forEach(button => {
+      const status = button.dataset.status;
+      const selected = this.filters.statuses.has(status);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+  }
+
   applyFilters() {
+    this.updateStatusControls();
     const weekData = this.weekData?.get(this.currentWeek);
     if (!weekData?.events) return;
 
     const filteredEvents = weekData.events.filter(event => {
       const competition = event.competitions?.[0];
       const matchesStatus =
-        this.filters.status === 'all' ||
-        competition?.status?.type?.state === this.filters.status;
+        this.filters.statuses.size === 0 ||
+        this.filters.statuses.has(competition?.status?.type?.state);
       return matchesStatus;
     });
 
@@ -251,18 +260,17 @@ class ScoreboardView {
 
     if (!hasGames) {
       this.elements.noGames.querySelector('p').textContent =
-        'No games match this status.';
+        'No games match the selected statuses.';
     }
   }
 
   updateFilterSummary(filteredCount, totalCount) {
-    const hasFilter = this.filters.status !== 'all';
-    const gameLabel = filteredCount === 1 ? 'game' : 'games';
+    const hasFilter = this.filters.statuses.size > 0;
+    const gameLabel = totalCount === 1 ? 'game' : 'games';
 
     this.elements.gamesSummary.textContent = hasFilter
       ? `${filteredCount} of ${totalCount} ${gameLabel}`
       : `${totalCount} ${totalCount === 1 ? 'game' : 'games'} this week`;
-    this.elements.clearFilters.classList.toggle('visible', hasFilter);
   }
 
   getLocalDateKey(date) {

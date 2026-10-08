@@ -45,8 +45,10 @@ A modern web application that displays NFL scoreboards by week using ESPN's API 
 
 - **Previous/Next Buttons**: Navigate chronologically through weeks
 - **Week Dropdown**: Jump directly to any specific week
-- **Game Status Filter**: Optionally narrow the weekly scoreboard to live,
-  upcoming, or final games
+- **Multi-select Status Pills**: Combine Upcoming, Live, and Final to show any
+  mix of game statuses (for example, Upcoming + Live hides completed games).
+  Selected pills use both a filled style and a checkmark. No statuses selected
+  means all games; toggle selected pills off to return to the full list.
 - **Grouped Game Days**: Scan a week quickly with clear daily sections
 - **Date Ranges**: Shows the date span for each week (e.g., "Nov 12 - Nov 16")
 - **Auto-Detection**: Automatically displays the current week on page load

@@ -122,26 +122,42 @@
 
       <!-- Scoreboard Filters -->
       <section id="scoreboard-toolbar" class="scoreboard-toolbar">
-        <div class="filter-grid">
-          <label class="filter-field">
-            <span>Status</span>
-            <select id="status-filter">
-              <option value="all">All games</option>
-              <option value="in">Live</option>
-              <option value="pre">Upcoming</option>
-              <option value="post">Final</option>
-            </select>
-          </label>
-          <button id="clear-filters" class="clear-filters" type="button">
-            Clear
+        <div
+          id="status-filters"
+          class="status-filters"
+          role="group"
+          aria-label="Game status, select multiple"
+        >
+          <button
+            class="status-pill"
+            type="button"
+            data-status="pre"
+            aria-pressed="false"
+          >
+            <span class="status-pill-check" aria-hidden="true">&#10003;</span>
+            Upcoming
+          </button>
+          <button
+            class="status-pill"
+            type="button"
+            data-status="in"
+            aria-pressed="false"
+          >
+            <span class="status-pill-check" aria-hidden="true">&#10003;</span>
+            <span class="status-pill-dot" aria-hidden="true"></span>
+            Live
+          </button>
+          <button
+            class="status-pill"
+            type="button"
+            data-status="post"
+            aria-pressed="false"
+          >
+            <span class="status-pill-check" aria-hidden="true">&#10003;</span>
+            Final
           </button>
         </div>
-        <div class="scoreboard-summary">
-          <p id="games-summary" aria-live="polite">Showing all games</p>
-          <p class="interaction-hint">
-            Select a team for its schedule · Select a game for details
-          </p>
-        </div>
+        <p id="games-summary" aria-live="polite">Showing all games</p>
       </section>
 
       <!-- Games Container -->

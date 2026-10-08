@@ -365,7 +365,7 @@ button {
 .retry-button,
 .back-button,
 .nav-button,
-.clear-filters {
+.status-pill {
   border: 0;
   cursor: pointer;
   transition:
@@ -522,66 +522,78 @@ button:focus-visible,
 
 .scoreboard-toolbar {
   margin-bottom: 1.15rem;
-  padding: 0.9rem 1rem 0.8rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  background: rgba(16, 32, 54, 0.68);
+  gap: 0.65rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
-.filter-grid {
+.scoreboard-toolbar.visible {
   display: flex;
-  gap: 0.7rem;
-  align-items: end;
 }
 
-.filter-field {
-  display: grid;
-  gap: 0.3rem;
-  width: min(220px, 100%);
+.status-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
-.filter-field span {
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.filter-field select {
-  width: 100%;
-}
-
-.clear-filters {
-  min-height: 40px;
-  display: none;
-  padding: 0.48rem 0.9rem;
-  border: 1px solid rgba(240, 82, 82, 0.35);
-  border-radius: 9px;
-  color: #ffb6b6;
-  background: rgba(240, 82, 82, 0.1);
-  font-size: 0.8rem;
+.status-pill {
+  min-height: 42px;
+  padding: 0.45rem 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: rgba(16, 32, 54, 0.45);
+  font-size: 0.78rem;
   font-weight: 750;
 }
 
-.clear-filters.visible {
-  display: block;
+.status-pill:hover {
+  color: var(--text-primary);
+  border-color: rgba(85, 164, 255, 0.4);
+  background: var(--navy-800);
 }
 
-.scoreboard-summary {
-  margin-top: 0.75rem;
-  padding-top: 0.65rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  border-top: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  font-size: 0.77rem;
+.status-pill[aria-pressed='true'] {
+  color: #a8d1ff;
+  border-color: rgba(85, 164, 255, 0.55);
+  background: rgba(45, 127, 249, 0.18);
+}
+
+.status-pill-check {
+  display: inline-block;
+  width: 0.85rem;
+  flex-shrink: 0;
+  visibility: hidden;
+  line-height: 1;
+}
+
+.status-pill[aria-pressed='true'] .status-pill-check {
+  visibility: visible;
+}
+
+.status-pill-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.status-pill[data-status='in'][aria-pressed='true'] {
+  color: #ffb6b6;
+  border-color: rgba(240, 82, 82, 0.5);
+  background: rgba(240, 82, 82, 0.1);
 }
 
 #games-summary {
-  color: var(--text-primary);
-  font-weight: 750;
+  color: var(--text-secondary);
+  font-size: 0.77rem;
+  font-weight: 650;
 }
 
 .interaction-hint {
@@ -1364,12 +1376,6 @@ button:focus-visible,
 
   .week-navigation {
     margin-inline: -0.1rem;
-  }
-
-  .scoreboard-summary {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.18rem;
   }
 
   .game-detail-content {
