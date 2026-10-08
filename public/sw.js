@@ -21,6 +21,7 @@ const ASSET_PATTERNS = [
 
 // API endpoints we want to cache
 const API_PATTERNS = [
+  /https:\/\/site\.api\.espn\.com\/apis\/v2\/sports\/football\/nfl\/standings(\?.*)?/,
   /https:\/\/site\.api\.espn\.com\/apis\/site\/v2\/sports\/football\/nfl\/scoreboard(\?.*)?/,
 ];
 

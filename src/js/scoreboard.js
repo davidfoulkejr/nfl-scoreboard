@@ -6,9 +6,7 @@ class ScoreboardView {
     this.currentWeek = 1;
     this.regularSeasonWeeks = [];
     this.filters = {
-      team: 'all',
       status: 'all',
-      day: 'all',
     };
 
     this.initializeElements();
@@ -28,9 +26,7 @@ class ScoreboardView {
       currentWeekTitle: document.getElementById('current-week-title'),
       currentWeekDates: document.getElementById('current-week-dates'),
       toolbar: document.getElementById('scoreboard-toolbar'),
-      teamFilter: document.getElementById('team-filter'),
       statusFilter: document.getElementById('status-filter'),
-      dayFilter: document.getElementById('day-filter'),
       clearFilters: document.getElementById('clear-filters'),
       gamesSummary: document.getElementById('games-summary'),
     };
@@ -47,16 +43,8 @@ class ScoreboardView {
     this.elements.weekSelect.addEventListener('change', e =>
       this.goToWeek(parseInt(e.target.value))
     );
-    this.elements.teamFilter.addEventListener('change', e => {
-      this.filters.team = e.target.value;
-      this.applyFilters();
-    });
     this.elements.statusFilter.addEventListener('change', e => {
       this.filters.status = e.target.value;
-      this.applyFilters();
-    });
-    this.elements.dayFilter.addEventListener('change', e => {
-      this.filters.day = e.target.value;
       this.applyFilters();
     });
     this.elements.clearFilters.addEventListener('click', () =>
@@ -70,7 +58,6 @@ class ScoreboardView {
     this.regularSeasonWeeks = Array.from(weekData.keys()).sort((a, b) => a - b);
     this.currentWeek = this.findCurrentWeek() || 1;
     this.populateWeekSelector();
-    this.populateTeamFilter();
   }
 
   // Show scoreboard view
@@ -178,7 +165,6 @@ class ScoreboardView {
     // Calculate and display week date range
     const dateRange = this.calculateWeekDateRange(weekData.events);
     this.elements.currentWeekDates.textContent = dateRange;
-    this.populateDayFilter(weekData.events);
 
     // Render games
     if (weekData.events && weekData.events.length > 0) {
@@ -236,66 +222,9 @@ class ScoreboardView {
       currentIndex === this.regularSeasonWeeks.length - 1;
   }
 
-  populateTeamFilter() {
-    const teams = new Map();
-
-    for (const weekData of this.weekData.values()) {
-      for (const event of weekData.events || []) {
-        for (const competitor of event.competitions?.[0]?.competitors || []) {
-          teams.set(competitor.team.abbreviation, competitor.team.displayName);
-        }
-      }
-    }
-
-    const options = Array.from(teams.entries())
-      .sort((a, b) => a[1].localeCompare(b[1]))
-      .map(
-        ([abbreviation, name]) =>
-          `<option value="${abbreviation}">${name}</option>`
-      )
-      .join('');
-
-    this.elements.teamFilter.innerHTML =
-      '<option value="all">All teams</option>' + options;
-  }
-
-  populateDayFilter(events) {
-    const selectedDay = this.filters.day;
-    const days = new Map();
-
-    for (const event of events || []) {
-      const date = new Date(event.date);
-      const key = this.getLocalDateKey(date);
-      days.set(
-        key,
-        date.toLocaleDateString('en-US', {
-          weekday: 'long',
-          month: 'short',
-          day: 'numeric',
-        })
-      );
-    }
-
-    const options = Array.from(days.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([key, label]) => `<option value="${key}">${label}</option>`)
-      .join('');
-
-    this.elements.dayFilter.innerHTML =
-      '<option value="all">All days</option>' + options;
-
-    if (days.has(selectedDay)) {
-      this.elements.dayFilter.value = selectedDay;
-    } else {
-      this.filters.day = 'all';
-    }
-  }
-
   resetFilters() {
-    this.filters = { team: 'all', status: 'all', day: 'all' };
-    this.elements.teamFilter.value = 'all';
+    this.filters = { status: 'all' };
     this.elements.statusFilter.value = 'all';
-    this.elements.dayFilter.value = 'all';
     this.applyFilters();
   }
 
@@ -305,19 +234,10 @@ class ScoreboardView {
 
     const filteredEvents = weekData.events.filter(event => {
       const competition = event.competitions?.[0];
-      const matchesTeam =
-        this.filters.team === 'all' ||
-        competition?.competitors?.some(
-          competitor => competitor.team.abbreviation === this.filters.team
-        );
       const matchesStatus =
         this.filters.status === 'all' ||
         competition?.status?.type?.state === this.filters.status;
-      const matchesDay =
-        this.filters.day === 'all' ||
-        this.getLocalDateKey(new Date(event.date)) === this.filters.day;
-
-      return matchesTeam && matchesStatus && matchesDay;
+      return matchesStatus;
     });
 
     this.renderGames(filteredEvents, this.currentWeek);
@@ -331,21 +251,18 @@ class ScoreboardView {
 
     if (!hasGames) {
       this.elements.noGames.querySelector('p').textContent =
-        'No games match these filters.';
+        'No games match this status.';
     }
   }
 
   updateFilterSummary(filteredCount, totalCount) {
-    const activeFilters = Object.values(this.filters).filter(
-      value => value !== 'all'
-    ).length;
+    const hasFilter = this.filters.status !== 'all';
     const gameLabel = filteredCount === 1 ? 'game' : 'games';
 
-    this.elements.gamesSummary.textContent =
-      activeFilters > 0
-        ? `${filteredCount} of ${totalCount} ${gameLabel}`
-        : `${totalCount} ${totalCount === 1 ? 'game' : 'games'} this week`;
-    this.elements.clearFilters.classList.toggle('visible', activeFilters > 0);
+    this.elements.gamesSummary.textContent = hasFilter
+      ? `${filteredCount} of ${totalCount} ${gameLabel}`
+      : `${totalCount} ${totalCount === 1 ? 'game' : 'games'} this week`;
+    this.elements.clearFilters.classList.toggle('visible', hasFilter);
   }
 
   getLocalDateKey(date) {
@@ -387,7 +304,7 @@ class ScoreboardView {
   }
 
   // Create individual game card
-  createGameCard(event, weekNumber) {
+  createGameCard(event, weekNumber, { teamLinks = true } = {}) {
     const card = document.createElement('div');
     card.className = 'game-card';
     card.style.cursor = 'pointer';
@@ -439,8 +356,8 @@ class ScoreboardView {
             
             <div class="teams-container">
                 <div class="team-matchup">
-                    ${this.createTeamHTML(awayTeam, status)}
-                    ${this.createTeamHTML(homeTeam, status)}
+                    ${this.createTeamHTML(awayTeam, status, teamLinks)}
+                    ${this.createTeamHTML(homeTeam, status, teamLinks)}
                 </div>
             </div>
             
@@ -454,7 +371,7 @@ class ScoreboardView {
   }
 
   // Create team HTML section
-  createTeamHTML(competitor, status) {
+  createTeamHTML(competitor, status, teamLinks = true) {
     const team = competitor.team;
     const score = competitor.score || '0';
     const isWinner = competitor.winner || false;
@@ -471,10 +388,14 @@ class ScoreboardView {
                 <img src="${logoUrl}" alt="" class="team-logo"
                      onerror="this.src='https://a.espncdn.com/i/teamlogos/nfl/500/default-team.png'">
                 <div class="team-info">
-                    <button class="team-name" data-team-abbr="${team.abbreviation}" title="View ${team.displayName} schedule">
+                    ${
+                      teamLinks
+                        ? `<button class="team-name" data-team-abbr="${team.abbreviation}" title="View ${team.displayName} schedule">`
+                        : '<span class="team-name team-name--static">'
+                    }
                       <span class="team-abbreviation">${team.abbreviation}</span>
                       <span class="team-city">${team.displayName}</span>
-                    </button>
+                    ${teamLinks ? '</button>' : '</span>'}
                 </div>
                 ${showScore ? `<div class="team-score ${isWinner ? 'winner' : ''}">${score}</div>` : ''}
             </div>
@@ -505,6 +426,14 @@ class ScoreboardView {
       competition.odds.length > 0
     ) {
       const odds = competition.odds[0];
+      const favoriteSide = odds.homeTeamOdds?.favorite
+        ? 'home'
+        : odds.awayTeamOdds?.favorite
+          ? 'away'
+          : null;
+      const favorite = competition.competitors?.find(
+        competitor => competitor.homeAway === favoriteSide
+      )?.team.abbreviation;
       detailsHTML += `
                 <div class="betting-odds">
                     <div class="odds-item">
@@ -518,13 +447,7 @@ class ScoreboardView {
                     <div class="odds-item">
                         <div class="odds-label">Favorite</div>
                         <div class="odds-value">
-                            ${
-                              odds.homeTeamOdds.favorite
-                                ? odds.homeTeamOdds.team.abbreviation
-                                : odds.awayTeamOdds.favorite
-                                  ? odds.awayTeamOdds.team.abbreviation
-                                  : 'EVEN'
-                            }
+                            ${favorite || (favoriteSide ? 'N/A' : 'EVEN')}
                         </div>
                     </div>
                 </div>
