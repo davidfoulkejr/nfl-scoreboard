@@ -1,3 +1,5 @@
+import { getBackNavigation } from './navigation.js';
+
 // Team Schedule View - Handles individual team schedule display across the season
 class TeamScheduleView {
   constructor(app) {
@@ -16,60 +18,24 @@ class TeamScheduleView {
   async loadTeamColors() {
     try {
       const response = await fetch('/team-colors.json');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       this.teamColors = await response.json();
+      if (this.currentTeam) this.renderTeamHeader();
     } catch (error) {
-      // Fallback if team colors can't be loaded
+      console.warn('Unable to load team colors; using ESPN team color:', error);
       this.teamColors = null;
     }
   }
 
-  // Calculate brightness of a color based on RGB values
-  calculateColorBrightness(r, g, b) {
-    return (r * 299 + g * 587 + b * 114) / 1000;
-  }
-
-  // Determine contrasting text color based on background brightness
-  getContrastingTextColor(r, g, b) {
-    const brightness = this.calculateColorBrightness(r, g, b);
-    return brightness > 125 ? '#000000' : '#ffffff';
-  }
-
-  // Convert hex color to RGB values
-  hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-      ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
-      : null;
-  }
-
-  // Get team colors and contrasting text color
-  getTeamStyleColors(teamAbbr) {
-    if (!this.teamColors || !this.teamColors[teamAbbr]) {
-      return {
-        primaryColor: '#003366',
-        textColor: '#ffffff',
-      };
-    }
-
-    const teamColorData = this.teamColors[teamAbbr];
-    const primaryHex = teamColorData.colors.hex[0];
-    const rgb = this.hexToRgb(primaryHex);
-
-    if (!rgb) {
-      return {
-        primaryColor: '#003366',
-        textColor: '#ffffff',
-      };
-    }
-
-    return {
-      primaryColor: primaryHex,
-      textColor: this.getContrastingTextColor(rgb.r, rgb.g, rgb.b),
-    };
+  getTeamColor() {
+    const color =
+      this.teamColors?.[this.currentTeam.abbreviation]?.colors?.hex?.[0] ||
+      this.currentTeam.color;
+    return /^#?[a-f\d]{6}$/i.test(color)
+      ? `#${color.replace(/^#/, '')}`
+      : '#2d7ff9';
   }
 
   // Initialize DOM elements
@@ -85,7 +51,7 @@ class TeamScheduleView {
   // Bind event listeners
   bindEvents() {
     this.elements.backButton.addEventListener('click', () => {
-      this.app.navigateToScoreboard();
+      this.app.navigateBack();
     });
   }
 
@@ -96,6 +62,8 @@ class TeamScheduleView {
 
   // Show team schedule view
   show(teamAbbr) {
+    document.getElementById('team-schedule-back-label').textContent =
+      getBackNavigation(this.app.currentRoute).label;
     this.currentTeam = this.getTeamInfoByAbbr(teamAbbr);
 
     if (!this.currentTeam) {
@@ -232,46 +200,37 @@ class TeamScheduleView {
   // Render team header with logo and info
   renderTeamHeader() {
     const record = this.calculateTeamRecord();
-    const colors = this.getTeamStyleColors(this.currentTeam.abbreviation);
+    const formatRecord = (wins, losses, ties) =>
+      `${wins}-${losses}${ties > 0 ? `-${ties}` : ''}`;
 
     this.elements.header.innerHTML = `
             <div class="team-schedule-title">
-                <img src="${this.currentTeam.logo}" alt="${this.currentTeam.displayName}" class="team-schedule-logo">
+                <img src="${this.currentTeam.logo}" alt="" class="team-schedule-logo">
                 <div class="team-schedule-info">
-                    <h1 class="team-schedule-name">${this.currentTeam.displayName}</h1>
-                    <div class="team-schedule-record">${record.wins}-${record.losses}${record.ties > 0 ? '-' + record.ties : ''}</div>
+                    <p class="eyebrow">${this.app.apiService.seasonYear} Regular Season</p>
+                    <h2 class="team-schedule-name">${this.currentTeam.displayName}</h2>
+                    <p class="team-schedule-subtitle">Team schedule</p>
                 </div>
             </div>
-            <div class="schedule-stats">
+            <div class="schedule-stats" aria-label="Season record">
+                <div class="stat-item">
+                    <span class="stat-label">Overall</span>
+                    <span class="stat-value">${formatRecord(record.wins, record.losses, record.ties)}</span>
+                </div>
                 <div class="stat-item">
                     <span class="stat-label">Home</span>
-                    <span class="stat-value">${record.homeWins}-${record.homeLosses}</span>
+                    <span class="stat-value">${formatRecord(record.homeWins, record.homeLosses, record.homeTies)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Away</span>
-                    <span class="stat-value">${record.awayWins}-${record.awayLosses}</span>
+                    <span class="stat-value">${formatRecord(record.awayWins, record.awayLosses, record.awayTies)}</span>
                 </div>
             </div>
         `;
-
-    // Apply team colors to the header
-    this.elements.header.style.background = `linear-gradient(135deg, ${colors.primaryColor}, ${colors.primaryColor}dd)`;
-    this.elements.header.style.color = colors.textColor;
-
-    // Update text colors for all elements in the header
-    const nameElement = this.elements.header.querySelector(
-      '.team-schedule-name'
+    this.elements.header.style.setProperty(
+      '--team-accent',
+      this.getTeamColor()
     );
-    const recordElement = this.elements.header.querySelector(
-      '.team-schedule-record'
-    );
-    const statLabels = this.elements.header.querySelectorAll('.stat-label');
-    const statValues = this.elements.header.querySelectorAll('.stat-value');
-
-    if (nameElement) nameElement.style.color = colors.textColor;
-    if (recordElement) recordElement.style.color = colors.textColor;
-    statLabels.forEach(label => (label.style.color = colors.textColor));
-    statValues.forEach(value => (value.style.color = colors.textColor));
   }
 
   // Calculate team record from schedule
@@ -280,9 +239,11 @@ class TeamScheduleView {
       losses = 0,
       ties = 0;
     let homeWins = 0,
-      homeLosses = 0;
+      homeLosses = 0,
+      homeTies = 0;
     let awayWins = 0,
-      awayLosses = 0;
+      awayLosses = 0,
+      awayTies = 0;
 
     for (const game of this.teamSchedule) {
       if (game.result === 'W') {
@@ -295,83 +256,105 @@ class TeamScheduleView {
         else awayLosses++;
       } else if (game.result === 'T') {
         ties++;
+        if (game.isHome) homeTies++;
+        else awayTies++;
       }
     }
 
-    return { wins, losses, ties, homeWins, homeLosses, awayWins, awayLosses };
+    return {
+      wins,
+      losses,
+      ties,
+      homeWins,
+      homeLosses,
+      homeTies,
+      awayWins,
+      awayLosses,
+      awayTies,
+    };
   }
 
   // Render all schedule games
   renderScheduleGames() {
-    const gamesHtml = this.teamSchedule
-      .map(game => this.renderGameCard(game))
-      .join('');
-
     this.elements.games.innerHTML = `
-            <div class="team-schedule-grid">
-                ${gamesHtml}
+            <div class="team-schedule-summary">
+                <div>
+                    <h3>Season schedule</h3>
+                    <p>${this.teamSchedule.length} games this season</p>
+                </div>
+                <p class="interaction-hint">Select a game for details</p>
             </div>
+            <div class="team-schedule-grid"></div>
         `;
 
-    // Add click listeners after rendering
-    this.addGameCardListeners();
+    const grid = this.elements.games.querySelector('.team-schedule-grid');
+    if (this.teamSchedule.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'no-data-message';
+      empty.textContent = 'No schedule data available for this team.';
+      grid.append(empty);
+      return;
+    }
+    for (const [state, title] of [
+      ['post', 'Completed games'],
+      ['in', 'Live now'],
+      ['pre', 'Upcoming games'],
+    ]) {
+      const games = this.teamSchedule.filter(game =>
+        state === 'pre'
+          ? !['post', 'in'].includes(game.gameStatus.type.state)
+          : game.gameStatus.type.state === state
+      );
+      if (games.length === 0) continue;
+      const heading = document.createElement('h4');
+      heading.className = 'game-day-heading';
+      heading.textContent = `${title} (${games.length})`;
+      grid.append(heading);
+      for (const game of games) grid.append(this.renderGameCard(game));
+    }
   }
 
   // Render individual game card
   renderGameCard(game) {
+    const card = this.app.scoreboard.createGameCard(game.event, game.week, {
+      teamLinks: false,
+    });
+    card.classList.add('team-game-card');
+    card.dataset.gameId = game.event.id;
+    card.dataset.week = game.week;
     const gameDate = new Date(game.event.date);
     const dateStr = gameDate.toLocaleDateString('en-US', {
+      weekday: 'short',
       month: 'short',
       day: 'numeric',
     });
-    const timeStr = gameDate.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
+    const time = card.querySelector('.game-header .game-time');
+    const kickoff = time.textContent;
+    time.textContent = `Week ${game.week} | ${dateStr}`;
+    card.querySelectorAll('.team').forEach(team => {
+      if (
+        team.querySelector('.team-abbreviation').textContent ===
+        this.currentTeam.abbreviation
+      ) {
+        team.classList.add('selected-team');
+      }
     });
 
-    const isCompleted = game.gameStatus.type.completed;
-    const resultClass = game.result
-      ? `result-${game.result.toLowerCase()}`
-      : '';
-    const homeAwayIcon = game.isHome ? 'vs' : '@';
-
-    return `
-            <div class="team-game-card ${resultClass}" data-game-id="${game.event.id}" data-week="${game.week}">
-                <div class="game-week">Week ${game.week}</div>
-                <div class="game-matchup">
-                    <div class="matchup-indicator">${homeAwayIcon}</div>
-                    <img src="${game.opponent.logo}" alt="${game.opponent.displayName}" class="opponent-logo">
-                    <div class="opponent-info">
-                        <div class="opponent-name">${game.opponent.displayName}</div>
-                        <div class="game-date">${dateStr}</div>
-                    </div>
-                </div>
-                <div class="game-result">
-                    ${
-                      isCompleted
-                        ? `<div class="final-score">
-                            <div class="score ${game.result === 'W' ? 'winner' : ''}">${game.teamScore}</div>
-                            <div class="score ${game.result === 'L' ? 'winner' : ''}">${game.opponentScore}</div>
-                        </div>
-                        <div class="result-badge ${resultClass}">${game.result}</div>`
-                        : `<div class="game-time">${timeStr}</div>
-                         <div class="game-status">${game.gameStatus.type.description}</div>`
-                    }
-                </div>
-            </div>
-        `;
-  }
-
-  // Add click handlers for game cards after rendering
-  addGameCardListeners() {
-    const gameCards = this.elements.games.querySelectorAll('.team-game-card');
-    gameCards.forEach(card => {
-      card.addEventListener('click', () => {
-        const gameId = card.dataset.gameId;
-        const week = card.dataset.week;
-        this.app.navigateToGame(parseInt(week), gameId);
-      });
-    });
+    const meta = document.createElement('div');
+    meta.className = 'team-schedule-game-meta';
+    const location = document.createElement('span');
+    location.textContent = game.isHome ? 'Home' : 'Away';
+    meta.append(location);
+    const result = document.createElement('span');
+    if (game.result) {
+      result.className = `result-badge result-${game.result.toLowerCase()}`;
+      result.textContent = { W: 'Win', L: 'Loss', T: 'Tie' }[game.result];
+    } else if (game.gameStatus.type.state === 'pre') {
+      result.textContent = kickoff;
+    }
+    meta.append(result);
+    card.querySelector('.game-details').prepend(meta);
+    return card;
   }
 }
 

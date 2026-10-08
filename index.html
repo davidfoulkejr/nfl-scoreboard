@@ -60,6 +60,16 @@
     </header>
 
     <main class="main-container">
+      <nav class="primary-nav" aria-label="Main navigation">
+        <a
+          id="scoreboard-link"
+          href="#/"
+          data-view="scoreboard"
+          aria-current="page"
+          >Scoreboard</a
+        >
+        <a href="#/standings" data-view="standings">Standings</a>
+      </nav>
       <!-- Loading State -->
       <div id="loading" class="loading-container">
         <div class="spinner"></div>
@@ -112,38 +122,42 @@
 
       <!-- Scoreboard Filters -->
       <section id="scoreboard-toolbar" class="scoreboard-toolbar">
-        <div class="filter-grid">
-          <label class="filter-field">
-            <span>Team</span>
-            <select id="team-filter">
-              <option value="all">All teams</option>
-            </select>
-          </label>
-          <label class="filter-field">
-            <span>Status</span>
-            <select id="status-filter">
-              <option value="all">All games</option>
-              <option value="in">Live</option>
-              <option value="pre">Upcoming</option>
-              <option value="post">Final</option>
-            </select>
-          </label>
-          <label class="filter-field">
-            <span>Game day</span>
-            <select id="day-filter">
-              <option value="all">All days</option>
-            </select>
-          </label>
-          <button id="clear-filters" class="clear-filters" type="button">
-            Clear
+        <div
+          id="status-filters"
+          class="status-filters"
+          role="group"
+          aria-label="Game status, select multiple"
+        >
+          <button
+            class="status-pill"
+            type="button"
+            data-status="pre"
+            aria-pressed="false"
+          >
+            <span class="status-pill-check" aria-hidden="true">&#10003;</span>
+            Upcoming
+          </button>
+          <button
+            class="status-pill"
+            type="button"
+            data-status="in"
+            aria-pressed="false"
+          >
+            <span class="status-pill-check" aria-hidden="true">&#10003;</span>
+            <span class="status-pill-dot" aria-hidden="true"></span>
+            Live
+          </button>
+          <button
+            class="status-pill"
+            type="button"
+            data-status="post"
+            aria-pressed="false"
+          >
+            <span class="status-pill-check" aria-hidden="true">&#10003;</span>
+            Final
           </button>
         </div>
-        <div class="scoreboard-summary">
-          <p id="games-summary" aria-live="polite">Showing all games</p>
-          <p class="interaction-hint">
-            Select a team for its schedule · Select a game for details
-          </p>
-        </div>
+        <p id="games-summary" aria-live="polite">Showing all games</p>
       </section>
 
       <!-- Games Container -->
@@ -164,7 +178,7 @@
         <nav class="game-detail-nav">
           <button id="back-to-scoreboard" class="back-button">
             <span class="back-arrow">←</span>
-            Back to Scoreboard
+            <span id="game-detail-back-label">Back to Scoreboard</span>
           </button>
         </nav>
 
@@ -207,7 +221,7 @@
         <nav class="team-schedule-nav">
           <button id="back-from-team-schedule" class="back-button">
             <span class="back-arrow">←</span>
-            Back to Scoreboard
+            <span id="team-schedule-back-label">Back to Scoreboard</span>
           </button>
         </nav>
 
@@ -220,6 +234,26 @@
         <div id="team-schedule-games" class="team-schedule-games">
           <!-- Populated by JavaScript -->
         </div>
+      </section>
+      <section
+        id="standings-container"
+        class="standings-container"
+        aria-labelledby="standings-title"
+      >
+        <div class="standings-heading">
+          <p class="eyebrow">League overview</p>
+          <h2 id="standings-title">Standings</h2>
+          <p id="standings-status" role="status"></p>
+          <button
+            id="retry-standings"
+            class="retry-button"
+            type="button"
+            hidden
+          >
+            Retry standings
+          </button>
+        </div>
+        <div id="standings-content"></div>
       </section>
     </main>
 

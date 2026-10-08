@@ -2,17 +2,29 @@ import APIService from './apiService.js';
 import ScoreboardView from './scoreboard.js';
 import GameDetailView from './gameDetail.js';
 import TeamScheduleView from './teamSchedule.js';
+import StandingsView from './standings.js';
+import {
+  parseRoute,
+  withReturnRoute,
+  getBackNavigation,
+  getNavigationSection,
+  getRouteScrollKey,
+} from './navigation.js';
 import '../styles/styles.css';
 
 // Main Application Router and Controller
 class NFLApp {
   constructor() {
     this.currentRoute = null;
+    this.scrollPositions = new Map();
+    this.displayedRouteKey = null;
+    this.routeRevision = 0;
     this.weekData = new Map();
     this.apiService = new APIService();
     this.scoreboard = new ScoreboardView(this);
     this.gameDetail = new GameDetailView(this);
     this.teamSchedule = new TeamScheduleView(this);
+    this.standings = new StandingsView(this);
     this.refreshInterval = null;
 
     this.updateSeasonBranding();
@@ -36,6 +48,7 @@ class NFLApp {
 
   // Initialize hash-based routing
   initializeRouter() {
+    window.history.scrollRestoration = 'manual';
     window.addEventListener('hashchange', () => this.handleRouteChange());
     window.addEventListener('load', () => this.handleRouteChange());
   }
@@ -61,63 +74,44 @@ class NFLApp {
   handleRouteChange() {
     const hash = window.location.hash || '#/';
     const route = this.parseRoute(hash);
-    this.navigateToRoute(route);
+    this.navigateToRoute(route).catch(error => {
+      console.error('Failed to display route:', error);
+      this.showError();
+    });
   }
 
   // Parse hash into route object
   parseRoute(hash) {
-    // Remove leading #/
-    const path = hash.replace(/^#\/?/, '');
-    const parts = path.split('/');
-
-    if (!path || path === '') {
-      return { view: 'scoreboard', week: null };
-    }
-
-    if (parts[0] === 'week' && parts[1]) {
-      const week = parseInt(parts[1]);
-
-      if (parts[2] === 'game' && parts[3]) {
-        return {
-          view: 'game-detail',
-          week: week,
-          gameId: parts[3],
-        };
-      }
-
-      return { view: 'scoreboard', week: week };
-    }
-
-    if (parts[0] === 'team' && parts[1]) {
-      const teamAbbr = parts[1].toUpperCase();
-
-      if (parts[2] === 'schedule') {
-        return {
-          view: 'team-schedule',
-          teamAbbr: teamAbbr,
-        };
-      }
-    }
-
-    // Default fallback
-    return { view: 'scoreboard', week: null };
+    return parseRoute(hash);
   }
 
   // Navigate to specific route
-  navigateToRoute(route) {
+  async navigateToRoute(route) {
+    if (this.displayedRouteKey !== null) {
+      this.scrollPositions.set(this.displayedRouteKey, window.scrollY);
+    }
+    this.displayedRouteKey = null;
     this.currentRoute = route;
+    if (this.weekData.size === 0) return;
+    const revision = ++this.routeRevision;
 
     // Hide all views initially
     this.hideAllViews();
 
-    // Scroll to top of page on route change
     window.scrollTo(0, 0);
 
     // Get main container for class management
     const mainContainer = document.querySelector('.main-container');
 
-    // Show appropriate view based on route
+    let viewReady;
     switch (route.view) {
+      case 'standings':
+        mainContainer.classList.remove(
+          'game-detail-mode',
+          'team-schedule-mode'
+        );
+        viewReady = this.standings.show();
+        break;
       case 'scoreboard':
         mainContainer.classList.remove(
           'game-detail-mode',
@@ -142,6 +136,34 @@ class NFLApp {
         );
         this.scoreboard.show();
     }
+    this.updatePrimaryNavigation();
+    const scrollKey = getRouteScrollKey(route, this.scoreboard.currentWeek);
+    await viewReady;
+    window.requestAnimationFrame(() => {
+      if (revision !== this.routeRevision) return;
+      window.scrollTo(0, this.scrollPositions.get(scrollKey) ?? 0);
+      this.displayedRouteKey = scrollKey;
+    });
+  }
+
+  updatePrimaryNavigation() {
+    const activeSection = getNavigationSection(this.currentRoute);
+    const scoreboardLink = document.getElementById('scoreboard-link');
+    scoreboardLink.href = `#/week/${this.scoreboard.currentWeek}`;
+    for (const link of document.querySelectorAll('.primary-nav a')) {
+      if (link.dataset.view === activeSection) {
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.removeAttribute('aria-current');
+      }
+    }
+  }
+
+  navigateBack(fallbackWeek = null) {
+    window.location.hash = getBackNavigation(
+      this.currentRoute,
+      fallbackWeek
+    ).href;
   }
 
   // Hide all main views
@@ -157,6 +179,10 @@ class NFLApp {
       'team-schedule-container'
     );
     const noGames = document.getElementById('no-games');
+    const standingsContainer = document.getElementById('standings-container');
+
+    standingsContainer.classList.remove('visible');
+    standingsContainer.style.display = 'none';
 
     weekNav.classList.remove('visible');
     weekNav.style.display = 'none';
@@ -212,12 +238,19 @@ class NFLApp {
 
   // Navigate to game detail
   navigateToGame(weekNumber, gameId) {
-    window.location.hash = `#/week/${weekNumber}/game/${gameId}`;
+    const hash = `#/week/${weekNumber}/game/${gameId}`;
+    window.location.hash =
+      this.currentRoute?.view === 'team-schedule'
+        ? withReturnRoute(hash, window.location.hash)
+        : hash;
   }
 
   // Navigate to team schedule
   navigateToTeamSchedule(teamAbbr) {
-    window.location.hash = `#/team/${teamAbbr.toLowerCase()}/schedule`;
+    window.location.hash = withReturnRoute(
+      `#/team/${teamAbbr.toLowerCase()}/schedule`,
+      `#/week/${this.scoreboard.currentWeek}`
+    );
   }
 
   // Navigate back to scoreboard
@@ -351,6 +384,11 @@ class NFLApp {
       const refreshedData = await this.apiService.refreshWeekData(currentWeek);
       if (refreshedData) {
         this.weekData.set(currentWeek, refreshedData);
+        if (this.currentRoute?.view === 'standings') {
+          this.standings.show(true);
+        } else if (this.currentRoute?.view === 'team-schedule') {
+          this.teamSchedule.show(this.currentRoute.teamAbbr);
+        }
 
         // Update the currently displayed view if it's showing the refreshed week
         if (this.currentRoute.week === currentWeek || !this.currentRoute.week) {

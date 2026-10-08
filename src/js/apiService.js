@@ -7,6 +7,61 @@ class APIService {
       'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
     this.seasonYear = getNFLSeasonYear();
     this.cache = new Map();
+    this.standingsCache = null;
+    this.standingsLoadedAt = 0;
+    this.standingsRequest = null;
+  }
+
+  async fetchStandings(forceRefresh = false) {
+    if (
+      !forceRefresh &&
+      this.standingsCache &&
+      Date.now() - this.standingsLoadedAt < 30000
+    ) {
+      return this.standingsCache;
+    }
+    if (this.standingsRequest) return this.standingsRequest;
+
+    this.standingsRequest = this.loadStandings();
+    try {
+      return await this.standingsRequest;
+    } finally {
+      this.standingsRequest = null;
+    }
+  }
+
+  async loadStandings() {
+    const url = `https://site.api.espn.com/apis/v2/sports/football/nfl/standings?season=${this.seasonYear}&type=2&level=3`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    const data = await response.json();
+    if (
+      !Array.isArray(data.children) ||
+      data.children.length === 0 ||
+      !data.children.every(
+        conference =>
+          Array.isArray(conference.children) &&
+          conference.children.length > 0 &&
+          conference.children.every(
+            division =>
+              Array.isArray(division.standings?.entries) &&
+              division.standings.entries.length > 0 &&
+              division.standings.entries.every(
+                entry =>
+                  typeof entry.team?.abbreviation === 'string' &&
+                  typeof entry.team?.displayName === 'string' &&
+                  Array.isArray(entry.stats)
+              )
+          )
+      )
+    ) {
+      throw new Error('Standings data is unavailable or incomplete');
+    }
+    this.standingsCache = data;
+    this.standingsLoadedAt = Date.now();
+    return data;
   }
 
   // Load data for all regular season weeks (1-18)

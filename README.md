@@ -29,23 +29,52 @@ A modern web application that displays NFL scoreboards by week using ESPN's API 
 
 ### 📊 Team Schedule View
 
-- **Full Season Overview**: Complete 18-week schedule for any selected team
-- **Game Status Indicators**: Visual markers for completed, live, and upcoming games
-- **Team Branding**: Dynamic team colors and styling based on selected team
-- **Comprehensive Game Cards**: Date, opponent, scores, and venue information
-- **Interactive Navigation**: Click any game to view detailed information
-- **Smart Color Contrast**: Automatically adjusts text color based on team color brightness
+- **Full Season Overview**: Season schedule grouped into completed, live, and upcoming games
+- **Consistent Game Cards**: Shares the weekly scoreboard's two-team layout,
+  status badges, live scores, venue, broadcasts, and available betting information
+- **Team Branding**: Dark header with a team-color accent and overall/home/away
+  record tiles, including ties
+- **Schedule Context**: Week and date on each card, selected-team highlighting,
+  home/away labels, and clear win/loss/tie badges
+- **Interactive Navigation**: Click a game or use Enter/Space for details;
+  contextual back navigation returns to the schedule and its originating view
+- **Responsive Layout**: Uses the weekly scoreboard's three/two/one-column card grid
+- **Live Updates**: Team schedules update during the existing live-game refresh cycle
 
 ### 📅 Week Navigation & Routing
 
 - **Previous/Next Buttons**: Navigate chronologically through weeks
 - **Week Dropdown**: Jump directly to any specific week
-- **Compact Filters**: Narrow the weekly scoreboard by team, game status, or day
+- **Multi-select Status Pills**: Combine Upcoming, Live, and Final to show any
+  mix of game statuses (for example, Upcoming + Live hides completed games).
+  Selected pills use both a filled style and a checkmark. No statuses selected
+  means all games; toggle selected pills off to return to the full list.
 - **Grouped Game Days**: Scan a week quickly with clear daily sections
 - **Date Ranges**: Shows the date span for each week (e.g., "Nov 12 - Nov 16")
 - **Auto-Detection**: Automatically displays the current week on page load
 - **URL-Based Navigation**: Shareable links for specific weeks, games, and team schedules
 - **Hash Routing**: `/week/3`, `/week/3/game/401772812`, and `/team/LAR` URL structure
+- **Scroll Restoration**: Returning from a game or team view restores your
+  position in the scoreboard, standings, or team schedule during the current
+  page session, including browser Back/Forward navigation
+
+### Standings
+
+- **League Overview**: AFC and NFC standings grouped into eight division tables
+- **Team Records**: Wins, losses, ties, winning percentage, division record,
+  and point differential, in ESPN's supplied order
+- **Clickable Rows**: Select any team row to open the existing team schedule;
+  team links also support keyboard navigation and opening in a new tab
+- **Persistent Navigation**: Scoreboard and Standings links remain available
+  throughout the app; Scoreboard returns to the selected week and preserves filters
+- **Contextual Back Links**: Standings → team schedule → game details retains
+  the return path, including after reloading or sharing a link
+- **Shareable Route**: `#/standings`; contextual schedule and game links include
+  a `from` query parameter
+- **Responsive Tables**: Division tables stack on smaller screens and scroll
+  horizontally without making the whole page overflow
+- **Data Loading**: Standings load on demand for the selected regular season,
+  with a 30-second cache and an explicit retry state on failure
 
 ### 📱 Responsive Design
 
@@ -76,6 +105,8 @@ nfl-scoreboard/
 │   │   ├── apiService.js        # ESPN API data management
 │   │   ├── scoreboard.js        # Week scoreboard view controller
 │   │   ├── gameDetail.js        # Individual game detail view controller
+│   │   ├── standings.js         # Division standings view controller
+│   │   ├── navigation.js        # Routes and contextual return links
 │   │   └── teamSchedule.js      # Team schedule view controller
 │   └── styles/
 │       └── styles.css           # Complete CSS with responsive design
@@ -193,6 +224,7 @@ Manages team-specific schedule display:
 - **Development**: `npm run dev` - Start development server with hot reload
 - **Production Build**: `npm run build` - Build optimized files to `dist/` directory
 - **Preview Build**: `npm run preview` - Preview the production build locally
+- **Tests**: `npm test` - Run standings data and navigation regression tests
 
 ### Automated Deployment
 
@@ -209,6 +241,8 @@ This repository includes GitHub Actions workflow for automatic deployment to Azu
 - **Current Week**: Automatically detected based on current date
 - **Game Details**: Click any game card to view comprehensive information
 - **Team Schedules**: Click team names/logos to view full season schedule
+- **Standings**: Use the Standings navigation link, then select a team row;
+  use the contextual back button to return to Standings
 - **URL Sharing**: Direct links to specific weeks, games, and team schedules
 - **Mobile**: Swipe-friendly interface on touch devices
 

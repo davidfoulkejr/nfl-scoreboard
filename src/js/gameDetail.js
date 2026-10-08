@@ -1,3 +1,5 @@
+import { getBackNavigation } from './navigation.js';
+
 // Game Detail View - Handles individual game display with leaders and box scores
 class GameDetailView {
   constructor(app) {
@@ -25,7 +27,7 @@ class GameDetailView {
   // Bind event listeners
   bindEvents() {
     this.elements.backButton.addEventListener('click', () => {
-      this.app.navigateToScoreboard(this.currentWeek);
+      this.app.navigateBack(this.currentWeek);
     });
   }
 
@@ -36,6 +38,8 @@ class GameDetailView {
 
   // Show game detail view
   show(weekNumber, gameId) {
+    document.getElementById('game-detail-back-label').textContent =
+      getBackNavigation(this.app.currentRoute, weekNumber).label;
     this.currentWeek = weekNumber;
     this.currentGame = this.app.getGameData(weekNumber, gameId);
 
